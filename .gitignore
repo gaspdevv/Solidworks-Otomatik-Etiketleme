@@ -30,3 +30,8 @@ outputs/src/Etiket.Kurulum/paket.json
 *.log
 *.user
 *.suo
+!outputs/copilot-kurulum/paket.json
+# Kurulumdaki yerel tanilar
+kurulum-*.log.json
+*.stdout.txt
+*.stderr.txt

@@ -13,6 +13,20 @@ namespace Pronom.Kurulum
   static void Ret(Action a,string why){try{a();}catch{Ok(true,why);return;}throw new Exception("TEST: Ret yok: "+why);}
   public static int Calistir(string work)
   {
+   Ok(KurulumCekirdegi.KurulumDurumu(KurulumCekirdegi.Kaydet28Dll,true,false,false).Dugme=="Güncelle","Kurulu28 Masaustu duzeltmesine guncellenmeli.");
+   Ok(KurulumCekirdegi.KurulumDurumu(KurulumCekirdegi.Kaydet29Dll,true,false,false).Dugme=="Güncelle","Kurulu29 native kapanis duzeltmesine guncellenmeli.");
+   Ok(KurulumCekirdegi.KurulumDurumu(KurulumCekirdegi.Kaydet31Dll,true,false,false).Dugme=="Güncelle","Kurulu31 tum dis format destegine guncellenmeli.");
+   Ok(KurulumCekirdegi.KurulumDurumu(KurulumCekirdegi.Kaydet30Dll,true,false,false).Dugme=="Güncelle","Kurulu30 kapanissiz dosya acma duzeltmesine guncellenmeli.");
+   var bakilan=new List<int>();
+   var sadece2020=KurulumCekirdegi.SolidWorksKurulumYillari(y=>{bakilan.Add(y);return y==2020?@"C:\SW2020":null;},p=>p==@"C:\SW2020\SLDWORKS.exe");
+   Ok(sadece2020.SequenceEqual(new[]{2020}),"Yalniz 2020 kurulu bilgisayar kabul edilmeli.");
+   Ok(bakilan.SequenceEqual(new[]{2020,2021,2022,2023}),"Yalniz desteklenen yil anahtarlari okunmali.");
+   Ok(KurulumCekirdegi.SolidWorksKurulumYillari(y=>@"C:\SW"+y,p=>p==@"C:\SW2020\SLDWORKS.exe"||p==@"C:\SW2023\SLDWORKS.exe").SequenceEqual(new[]{2020,2023}),"Yan yana 2020 ve 2023 kurulumlari bulunmali.");
+   foreach(var yil in new[]{2021,2022,2023})Ok(KurulumCekirdegi.SolidWorksKurulumYillari(y=>y==yil?@"C:\SW":null,p=>true).SequenceEqual(new[]{yil}),"Her desteklenen yil tek basina kurulabilmeli.");
+   Ok(KurulumCekirdegi.SolidWorksKurulumYillari(y=>@"C:\Silinmis",p=>false).Length==0,"Eski registry anahtari tek basina kurulum sayilmamali.");
+   Ok(KurulumCekirdegi.SolidWorksKurulumYillari(y=>y==2024?@"C:\SW2024":null,p=>true).Length==0,"Sadece 2024 olan bilgisayar kabul edilmemeli.");
+   Ok(KurulumCekirdegi.SolidWorksKurulumYillari(y=>"  ",p=>{throw new Exception("Bos yol sorgulanmamali");}).Length==0,"Bos registry degeri dosya sorgusu yapmamali.");
+   Ok(KurulumCekirdegi.KurulumDurumu(KurulumCekirdegi.Kaydet27Dll,true,false,false).Dugme=="Güncelle","Kabul edilmis27 yeni coklu surum paketine guncellenmeli.");
    Ok(KurulumCekirdegi.KurulumDurumu(null,false,false,false).Dugme=="Kur","Temiz bilgisayarda Kur.");
    Ok(KurulumCekirdegi.KurulumDurumu(KurulumCekirdegi.EskiDll,false,false,false).Dugme=="Güncelle","Eski klasorde21 guncellenmeli.");
    Ok(KurulumCekirdegi.KurulumDurumu(KurulumCekirdegi.EskiDll,true,false,false).Dugme=="Güncelle","Hedefte21 guncellenmeli.");
@@ -69,7 +83,7 @@ namespace Pronom.Kurulum
   }
   public static int Guncelleme(string work,string eskiDll)
   {
-   var eskiHash=KurulumCekirdegi.Hash(eskiDll);Ok(eskiHash==KurulumCekirdegi.EskiDll||eskiHash==KurulumCekirdegi.PerformansDll||eskiHash==KurulumCekirdegi.DxfDll||eskiHash==KurulumCekirdegi.Kaydet25Dll||eskiHash==KurulumCekirdegi.Kaydet26Dll,"Gercek21/23/24/25/26 guncelleme fixture'i gerekir.");
+   var eskiHash=KurulumCekirdegi.Hash(eskiDll);Ok(eskiHash==KurulumCekirdegi.EskiDll||eskiHash==KurulumCekirdegi.PerformansDll||eskiHash==KurulumCekirdegi.DxfDll||eskiHash==KurulumCekirdegi.Kaydet25Dll||eskiHash==KurulumCekirdegi.Kaydet26Dll||eskiHash==KurulumCekirdegi.Kaydet27Dll||eskiHash==KurulumCekirdegi.Kaydet28Dll||eskiHash==KurulumCekirdegi.Kaydet29Dll||eskiHash==KurulumCekirdegi.Kaydet30Dll||eskiHash==KurulumCekirdegi.Kaydet31Dll||eskiHash==KurulumCekirdegi.Kaydet32Dll,"Gercek21/23/24/25/26/27 guncelleme fixture'i gerekir.");
    var root=Path.Combine(work,"guncelleme-"+Guid.NewGuid().ToString("N").Substring(0,8));Directory.CreateDirectory(root);
    var kaynak=Path.Combine(root,"paket");KurulumCekirdegi.PaketiAc(kaynak);
    var hedef=Path.Combine(root,"hedef");Directory.CreateDirectory(hedef);

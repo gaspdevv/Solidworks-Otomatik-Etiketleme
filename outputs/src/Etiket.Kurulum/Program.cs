@@ -77,9 +77,9 @@ namespace Pronom.Kurulum
    StartPosition=FormStartPosition.CenterScreen;Font=new Font("Segoe UI",10);BackColor=Color.FromArgb(245,248,247);MaximizeBox=false;
    var ust=new Panel{Dock=DockStyle.Top,Height=110,BackColor=Petrol};Controls.Add(ust);
    var marka=new Label{Text="Pronom",ForeColor=Color.White,Font=new Font("Segoe UI",24,FontStyle.Bold),Location=new Point(28,16),Size=new Size(400,44)};ust.Controls.Add(marka);ozelFontlar.Add(marka);
-   ust.Controls.Add(new Label{Text="SOLIDWORKS CO-PILOT  /  DXF DESTEĞİ",ForeColor=Color.FromArgb(174,209,199),Location=new Point(31,69),Size=new Size(610,24)});
+   ust.Controls.Add(new Label{Text="SOLIDWORKS  /  DIŞA AKTARMA DESTEĞİ",ForeColor=Color.FromArgb(174,209,199),Location=new Point(31,69),Size=new Size(610,24)});
    var baslik=new Label{Text="Eklentiyi kullanıma hazır hale getirin",Font=new Font("Segoe UI",16,FontStyle.Bold),ForeColor=Petrol,Location=new Point(30,130),Size=new Size(650,34)};Controls.Add(baslik);ozelFontlar.Add(baslik);
-   Controls.Add(new Label{Text="SolidWorks 2023 için dosyalar, eklenti kaydı ve kullanıcı ayarları birlikte hazırlanır.",Location=new Point(32,174),Size=new Size(650,43),ForeColor=Color.FromArgb(80,99,100)});
+   Controls.Add(new Label{Text="SolidWorks 2020–2023 için dosyalar, eklenti kaydı ve kullanıcı ayarları birlikte hazırlanır.",Location=new Point(32,174),Size=new Size(650,43),ForeColor=Color.FromArgb(80,99,100)});
    Controls.Add(new Label{Text="Merkez adresi",Location=new Point(32,226),Size=new Size(640,25)});
    adres.SetBounds(32,254,650,30);adres.Font=new Font("Segoe UI",12);adres.Text="http://192.0.2.10:5082";
    ozelFontlar.Add(adres);

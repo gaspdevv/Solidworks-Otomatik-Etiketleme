@@ -41,6 +41,10 @@ namespace Etiket.SolidWorks
   }
   public void KayitSonucunuAl()
   {if(bekleyen!=null&&(bekleyen.Asama=="Onaylandi"||bekleyen.Asama=="Iptal")){bekleyen=null;KaydaDevredildi=false;}}
+  public void PencereIptaliniTamamla(bool iptalIstendi)
+  {
+   if(iptalIstendi&&!KaydaDevredildi)IptalEt();
+  }
   public void IptalEt()
   {
    if(KaydaDevredildi)return; // Pencerenin programatik kapanışı, kayıt iptali değildir.

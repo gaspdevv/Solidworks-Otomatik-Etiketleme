@@ -14,6 +14,9 @@ namespace Etiket.SolidWorks
  [ComVisible(true),Guid("ADC907D3-B1B5-4EAB-9C3A-0B1885FB416C"),ClassInterface(ClassInterfaceType.AutoDispatch)]
  public sealed class PronomEklentisi:ISwAddin
  {
+  // Yeni sürümlerdeki Cancelled=26, 2020 interop enum'unda bulunmaz.
+  // 2020'de gerçek İptal/WM_CLOSE girdisi ayrıca native pencerede izlenir.
+  const int DosyaAdiIstegiIptal=26;
   ISldWorks uygulama;SldWorks olaylar;HttpAdServisi servis;
   KaliciIslemGunlugu gunluk;KaydetmeIslemYoneticisi yonetici;
   NativePencereTanisi nativeTani;
@@ -26,10 +29,11 @@ namespace Etiket.SolidWorks
   readonly Dictionary<IntPtr,BelgeOlaylari> belgeler=new Dictionary<IntPtr,BelgeOlaylari>();
   readonly Dictionary<IntPtr,BilesenKayitTanisi> bilesenTanilari=new Dictionary<IntPtr,BilesenKayitTanisi>();
   readonly Queue<Action> bosZamanIslemleri=new Queue<Action>();bool idleIslemiCalisiyor;
+  readonly BagimsizKayitSirasi bagimsizSirasi=new BagimsizKayitSirasi();
   bool bagimsizYazimCalisiyor;
   System.Windows.Forms.Timer kuyrukTaniSayaci;
   int kuyrukIdleSayisi,kuyrukSorguSayisi,kuyrukTaniSayisi;
-  string kuyrukSonSorgu="sorgulanmadi";
+  string kuyrukSonSorgu="sorgulanmadi",sonNativeKapanisTanisi="";
   DateTime sonrakiKomutDogrulamasi=DateTime.MinValue;
   public bool ConnectToSW(object ThisSW,int Cookie)
   {
@@ -39,7 +43,7 @@ namespace Etiket.SolidWorks
     uygulama=(ISldWorks)ThisSW;
     adim="SolidWorks sürüm kontrolü";
     var revizyon=uygulama.RevisionNumber();
-    if(!SolidWorksSurumKurali.TestHedefiMi(revizyon))throw new InvalidOperationException("Bu test paketi SolidWorks 2023 içindir. Okunan API revizyonu: "+revizyon);
+    if(!SolidWorksSurumKurali.TestHedefiMi(revizyon))throw new InvalidOperationException("Bu paket SolidWorks 2020–2023 içindir. Okunan API revizyonu: "+revizyon);
     KayitOlayTanisi.Yaz("SurumKontrolu",revizyon);
     adim="Kullanıcı ayarı ve işlem günlüğü";
     servis=new HttpAdServisi(EklentiAyarlari.ApiAdresi());
@@ -55,12 +59,12 @@ namespace Etiket.SolidWorks
     olaylar=(SldWorks)ThisSW;olaylar.FileOpenNotify2+=BelgeAcilmayaBasladi;olaylar.DocumentLoadNotify2+=BelgeYuklendi;olaylar.FileNewNotify2+=YeniBelge;olaylar.FileOpenPostNotify+=BelgeAcildi;olaylar.OnIdleNotify+=BosZaman;
     olaylar.PromptForFilenameNotify+=DosyaAdiIstendi;olaylar.CommandOpenPreNotify+=KomutAciliyor;olaylar.CommandCloseNotify+=KomutKapandi;
     adim="Açık belgelerin olaylarını bağlama";
-    belgeTaramasi.Iste();KayitOlayTanisi.Yaz("EklentiHazir",uygulama.RevisionNumber()+" tani=27-yinelenen-komut-sirasi ornek="+ornekKimligi+"");return true;
+    belgeTaramasi.Iste();KayitOlayTanisi.Yaz("EklentiHazir",uygulama.RevisionNumber()+" tani=33-bagimsiz-is-sirasi ornek="+ornekKimligi+"");return true;
    }
    catch(Exception h){Bildir("Pronom eklentisi başlatılamadı. Adım: "+adim+". "+h.Message+" ("+h.GetType().Name+", 0x"+h.HResult.ToString("X8")+")");DisconnectFromSW();return false;}
   }
   int YeniBelge(object yeni,int tur,string sablon){KayitOlayTanisi.Yaz("YeniBelgeErtelendi","tur="+tur);belgeTaramasi?.Iste();return 0;}
-  int BelgeAcildi(string yol){KayitOlayTanisi.Yaz("BelgeAcildiErtelendi",yol);kayitOncesiBaglama.BelgeAcildi(yol);yuklemeDurumu.BilesenSecimiBitti();belgeTaramasi?.Iste();return 0;}
+  int BelgeAcildi(string yol){KayitOlayTanisi.Yaz("BelgeAcildiErtelendi",yol);kayitOncesiBaglama.BelgeAcildi(yol);yuklemeDurumu.BilesenSecimiBitti();yuklemeDurumu.DosyaAcmaSonucuGeldi();belgeTaramasi?.Iste();return 0;}
   int BelgeAcilmayaBasladi(string yol){KayitOlayTanisi.Yaz("FileOpenNotify2",yol);return 0;}
   int BelgeYuklendi(string baslik,string yol){KayitOlayTanisi.Yaz("DocumentLoadNotify2","baslik="+baslik+" yol="+yol);yuklemeDurumu.SecimdeBelgeYuklendi(yol);belgeTaramasi?.Iste();return 0;}
   int DosyaAdiIstendi(int acKaydet,string onerilen,int belgeTuru,int neden)
@@ -74,9 +78,14 @@ namespace Etiket.SolidWorks
      yuklemeDurumu.BilesenSecimiBasladi();
      KayitOlayTanisi.Yaz("BilesenSecimiBasladi","sahip="+yuklemeDurumu.SecimiBaslatanKomut+" komutlar="+yuklemeDurumu.BekleyenKomutlar);
     }
-    if(neden==(int)swPrompForFilenameCause_e.swPromptForFilename_Cancelled)yuklemeDurumu.BilesenSecimiBitti();
+    if(neden==DosyaAdiIstegiIptal)yuklemeDurumu.BilesenSecimiBitti();
     KayitOlayTanisi.Yaz("PromptAcmaDondu","neden="+neden+" ornek="+ornekKimligi+" native/COM/HTTP yok");
     return 0;
+   }
+   if(acKaydet==0&&neden==(int)swPrompForFilenameCause_e.swGeneric&&DisAktarimKurali.HariciDosyaMi(onerilen))
+   {
+    KayitOlayTanisi.Yaz("DisAktarimPencereSerbest","hedef="+onerilen+" merkeziIslem=yok");
+    return 0; // Acma yolu yukarida dondu. Kaydedilmemis model/cizim dahil native export.
    }
    if(acKaydet==0&&neden==(int)swPrompForFilenameCause_e.swGeneric&&NativeAdDenemePenceresi.StandartKayitAcik
     &&(belgeTuru==(int)swDocumentTypes_e.swDocPART||belgeTuru==(int)swDocumentTypes_e.swDocASSEMBLY))
@@ -86,12 +95,6 @@ namespace Etiket.SolidWorks
      var model=uygulama.ActiveDoc as IModelDoc2;
      if(model==null||model.GetType()!=belgeTuru)throw new IOException("Standart kaydın etkin belgesi doğrulanamadı.");
      var kaynak=model.GetPathName();
-     if(DxfAktarimKurali.Eslesiyor(belgeTuru==(int)swDocumentTypes_e.swDocPART?"P":"M",kaynak,onerilen))
-     {
-      if(standartAd?.RezervasyonBekliyor==true||nativeAd?.RezervasyonBekliyor==true)throw new IOException("Önce önceki CAD kayıt işlemini tamamlayın; DXF için yeni numara ayrılmadı.");
-      KayitOlayTanisi.Yaz("DxfPencereSerbest","kaynak="+kaynak+" hedef="+onerilen+" merkeziIslem=yok");
-      return 0; // SolidWorks'un DXF secim/pencere/export seceneklerini koru.
-     }
      if(!string.IsNullOrEmpty(kaynak)&&!DosyaAdiKurali.AyniYol(kaynak,onerilen))throw new IOException("Kayıt penceresi etkin belgeye ait değil; iç içe belge kaydı bu sürümde desteklenmiyor.");
      BelgeyiBagla(model);var kimlik=Marshal.GetIUnknownForObject(model);Marshal.Release(kimlik);
      var bag=belgeler[kimlik];
@@ -100,7 +103,7 @@ namespace Etiket.SolidWorks
     }
     catch(Exception h){KayitOlayTanisi.Yaz("StandartPencereHatasi",h.ToString());Bildir("Standart kayıt hazırlanamadı: "+h.Message+" Dosya kaydetmeyin; İptal seçin.");}
    }
-   if(acKaydet==0&&neden==(int)swPrompForFilenameCause_e.swPromptForFilename_Cancelled&&standartAd?.RezervasyonBekliyor==true&&standartAd.IptalEslesiyor(onerilen))
+   if(acKaydet==0&&neden==DosyaAdiIstegiIptal&&standartAd?.RezervasyonBekliyor==true&&standartAd.IptalEslesiyor(onerilen))
     try{standartAd.IptalEt();}catch(Exception h){Bildir("Standart kayıt iptali/sonucu bekliyor; aynı işlem kimliği korundu. "+h.Message);}
    if(acKaydet==0&&neden==(int)swPrompForFilenameCause_e.swMakeComponentIndependent&&NativeAdDenemePenceresi.ModAcik)
     try
@@ -122,7 +125,7 @@ namespace Etiket.SolidWorks
      nativeAd.Hazirla(belgeTuru==(int)swDocumentTypes_e.swDocPART?"P":belgeTuru==(int)swDocumentTypes_e.swDocASSEMBLY?"M":"X",onerilen,kayit,Bildir);
     }
     catch(Exception h){Bildir("Native ad denemesi: "+h.Message+" Dosya kaydetmeyin; İptal seçin.");}
-   if(acKaydet==0&&neden==(int)swPrompForFilenameCause_e.swPromptForFilename_Cancelled&&nativeAd?.RezervasyonBekliyor==true&&nativeAd.IptalEslesiyor(onerilen))
+   if(acKaydet==0&&neden==DosyaAdiIstegiIptal&&nativeAd?.RezervasyonBekliyor==true&&nativeAd.IptalEslesiyor(onerilen))
     try{nativeAd.IptalEt();}catch(Exception h){Bildir("Deneme iptali bekliyor; işlem kimliği korundu. "+h.Message);}
    if(acKaydet==0&&neden==(int)swPrompForFilenameCause_e.swMakeComponentIndependent)try{if(nativeTani==null)nativeTani=new NativePencereTanisi();nativeTani.Baslat();}catch(Exception h){KayitOlayTanisi.Yaz("NativeTaniHatasi",h.Message);}
    return 0; // Tanı dinleyicisi native komutu veya dosya adını değiştirmez.
@@ -130,7 +133,7 @@ namespace Etiket.SolidWorks
   int KomutAciliyor(int komut,int kullaniciKomutu)
   {
    KayitOlayTanisi.Yaz("CommandOpenPreNotify","komut="+komut+" kullanici="+kullaniciKomutu+" ornek="+ornekKimligi);
-   yuklemeDurumu.KomutAcildi(komut);
+   yuklemeDurumu.KomutAcildi(komut);bagimsizSirasi.GozlemiGecersizKil();
    try
    {
     IModelDoc2 hedef=null;
@@ -169,11 +172,11 @@ namespace Etiket.SolidWorks
    if(secimVardi&&!yuklemeDurumu.BilesenSecimiSuruyor)KayitOlayTanisi.Yaz("BilesenSecimiBitti","kapananKomut="+komut);
    if(komut==3494&&!bagimsizYazimCalisiyor)try
    {
-    var kayit=nativeAd?.KayitKapanisiniAl();nativeTani?.Durdur();nativeAd?.Dispose();
+    var kayit=nativeAd?.KayitKapanisiniAl();nativeAd?.KomutKapanisiniTamamla();nativeTani?.Durdur();nativeAd?.Dispose();
     KayitOlayTanisi.Yaz("BagimsizKuyrukDevir","eylem="+(kayit!=null)+" komutlar="+yuklemeDurumu.BekleyenKomutlar+" secim="+yuklemeDurumu.BilesenSecimiSuruyor);
-    if(kayit!=null){bosZamanIslemleri.Enqueue(kayit);KuyrukTanisiniBaslat();}
+    if(kayit!=null){bagimsizSirasi.Ekle(kayit,true);KuyrukTanisiniBaslat();}
    }catch(Exception h){KayitOlayTanisi.Yaz("NativeAdTemizlikHatasi",h.Message);}
-   if(komut==2||komut==620)try{standartAd?.KayitSonucunuAl();standartAd?.Dispose();}catch(Exception h){KayitOlayTanisi.Yaz("StandartTemizlikHatasi",h.ToString());}
+   if(komut==2||komut==620)try{standartAd?.KomutKapanisiniTamamla();standartAd?.Dispose();}catch(Exception h){KayitOlayTanisi.Yaz("StandartTemizlikHatasi",h.ToString());}
    return 0;
   }
   void BagimsizKaydiYaz(KaydetmeIslemi islem,string ad,SolidWorksBagimsizBilesenKaydi bilesen)
@@ -196,6 +199,52 @@ namespace Etiket.SolidWorks
   }
   int BosZaman()
   {
+   if(nativeAd?.KapanisTakibiVar==true)
+   {
+    var durum=nativeAd.KapanisTanisi+" guvenli="+yuklemeDurumu.Guvenli+" komutlar="+yuklemeDurumu.BekleyenKomutlar;
+    if(durum!=sonNativeKapanisTanisi){sonNativeKapanisTanisi=durum;KayitOlayTanisi.Yaz("NativeKapanisBekliyor",durum);}
+   }
+   // SW2020, Bagimsiz Yap icin CommandOpenPre/CommandClose gondermeyebilir.
+   // Kendi izlenen pencerenin kapanisi WM_NCDESTROY veya !IsWindow ile dogrulanir.
+   // Zaman asimi, pencere basligi veya tahmini komut kapanisi kullanilmaz.
+   if(!idleIslemiCalisiyor&&!bagimsizYazimCalisiyor&&nativeAd?.KapaliPencereSonucuBekliyor==true&&standartAd?.Aktif!=true&&BagimsizArayuzKapisi.Sorgulanabilir())
+   {
+    idleIslemiCalisiyor=true;
+    try
+    {
+     uygulama.GetRunningCommandInfo(out var kapananKomut,out var kapananBaslik,out var komutAktif);
+     if(komutAktif)return 0; // Kapali dosya penceresi, baska etkin komutu bitirmis sayilmaz.
+     var kayit=nativeAd.KayitKapanisiniAl();nativeAd.KomutKapanisiniTamamla();nativeTani?.Durdur();nativeAd.Dispose();
+     KayitOlayTanisi.Yaz("BagimsizNativeKapanisDevri","eylem="+(kayit!=null)+" komutlar="+yuklemeDurumu.BekleyenKomutlar);
+     if(kayit!=null){bagimsizSirasi.Ekle(kayit,true);KuyrukTanisiniBaslat();}
+    }
+    catch(Exception h){KayitOlayTanisi.Yaz("NativeAdTemizlikHatasi",h.ToString());}
+    finally{idleIslemiCalisiyor=false;}
+   }
+   // Bağımsız kayıt, genel belge taraması/kopya kuyruğundan ayrı yürütülür.
+   // Eski bir komut/yerleştirme bildirimi bu işin ilerlemesini engelleyemez.
+   if(bagimsizSirasi.Bekliyor)
+   {
+    kuyrukIdleSayisi++;
+    if(idleIslemiCalisiyor||bagimsizYazimCalisiyor||nativeAd?.Aktif==true||standartAd?.Aktif==true)
+    {bagimsizSirasi.GozlemiGecersizKil();return 0;}
+    idleIslemiCalisiyor=true;
+    try
+    {
+     var pencereGuvenli=BagimsizArayuzKapisi.Sorgulanabilir();bool? aktif=null;
+     if(pencereGuvenli)
+     {
+      uygulama.GetRunningCommandInfo(out var komut,out var baslik,out var arayuzAktif);
+      kuyrukSorguSayisi++;kuyrukSonSorgu="komut="+komut+" arayuzAktif="+arayuzAktif;
+      aktif=arayuzAktif;
+     }
+     if(bagimsizSirasi.Dene(pencereGuvenli,aktif))
+      KayitOlayTanisi.Yaz("BagimsizSiraTamamlandi","idle="+kuyrukIdleSayisi+" gecmisKomutlar="+yuklemeDurumu.BekleyenKomutlar);
+    }
+    catch(Exception h){bagimsizSirasi.GozlemiGecersizKil();KayitOlayTanisi.Yaz("BagimsizSiraHatasi",h.ToString());}
+    finally{idleIslemiCalisiyor=false;if(!bagimsizSirasi.Bekliyor)KuyrukTanisiniDurdur();}
+    return 0;
+   }
    if(bosZamanIslemleri.Count>0)kuyrukIdleSayisi++;
    if(idleIslemiCalisiyor||(!(belgeTaramasi?.Bekliyor??false)&&bosZamanIslemleri.Count==0))return 0;
    // OnIdle, CommandOpenPre/Close bildirimlerinin dengeli olduğu anlamına gelmez.
@@ -231,7 +280,7 @@ namespace Etiket.SolidWorks
     if(belgeTaramasi?.Bekliyor==true)belgeTaramasi.Calistir();
     else
     {
-     KayitOlayTanisi.Yaz("BagimsizKuyrukCalisiyor","kuyruk="+bosZamanIslemleri.Count+" idle="+kuyrukIdleSayisi);
+     KayitOlayTanisi.Yaz("BagimsizKuyrukCalisiyor","kuyruk="+(bosZamanIslemleri.Count+(bagimsizSirasi.Bekliyor?1:0))+" idle="+kuyrukIdleSayisi);
      bosZamanIslemleri.Dequeue()();
     }
    }
@@ -250,8 +299,8 @@ namespace Etiket.SolidWorks
   }
   void KuyrukTaniTick(object sender,EventArgs e)
   {
-   if(bosZamanIslemleri.Count==0||!KayitOlayTanisi.Acik){KuyrukTanisiniDurdur();return;}
-   KayitOlayTanisi.Yaz("BagimsizKuyrukBekliyor","kuyruk="+bosZamanIslemleri.Count+" idle="+kuyrukIdleSayisi+" sorgu="+kuyrukSorguSayisi+" son="+kuyrukSonSorgu+" komutlar="+yuklemeDurumu.BekleyenKomutlar+" secim="+yuklemeDurumu.BilesenSecimiSuruyor+" sahip="+yuklemeDurumu.SecimiBaslatanKomut+" guvenli="+yuklemeDurumu.Guvenli+" dogrulanabilir="+yuklemeDurumu.KomutDogrulanabilir+" idleCalisiyor="+idleIslemiCalisiyor);
+   if((!bagimsizSirasi.Bekliyor&&bosZamanIslemleri.Count==0)||!KayitOlayTanisi.Acik){KuyrukTanisiniDurdur();return;}
+   KayitOlayTanisi.Yaz("BagimsizKuyrukBekliyor","kuyruk="+(bosZamanIslemleri.Count+(bagimsizSirasi.Bekliyor?1:0))+" idle="+kuyrukIdleSayisi+" sorgu="+kuyrukSorguSayisi+" son="+kuyrukSonSorgu+" komutlar="+yuklemeDurumu.BekleyenKomutlar+" secim="+yuklemeDurumu.BilesenSecimiSuruyor+" sahip="+yuklemeDurumu.SecimiBaslatanKomut+" guvenli="+yuklemeDurumu.Guvenli+" dogrulanabilir="+yuklemeDurumu.KomutDogrulanabilir+" idleCalisiyor="+idleIslemiCalisiyor);
    if(++kuyrukTaniSayisi>=12)KuyrukTanisiniDurdur();
   }
   void KuyrukTanisiniDurdur()
@@ -310,7 +359,7 @@ namespace Etiket.SolidWorks
    nativeAd?.Dispose();nativeAd=null;
    standartAd?.Dispose();standartAd=null;
    belgeTaramasi?.Temizle();belgeTaramasi=null;kayitOncesiBaglama.Temizle();yuklemeDurumu.Temizle();taramaBeklemesiYazildi=false;
-   belgeler.Clear();bosZamanIslemleri.Clear();servis?.Dispose();servis=null;uygulama=null;return true;
+   belgeler.Clear();bosZamanIslemleri.Clear();bagimsizSirasi.Temizle();servis?.Dispose();servis=null;uygulama=null;return true;
   }
   [ComRegisterFunction]
   public static void Kaydet(Type t)

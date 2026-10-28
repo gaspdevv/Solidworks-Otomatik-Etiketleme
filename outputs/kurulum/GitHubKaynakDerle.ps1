@@ -1,4 +1,4 @@
-param([Parameter(Mandatory=$true)][string]$SolidWorksApiKlasoru)
+﻿param([Parameter(Mandatory=$true)][string]$SolidWorksApiKlasoru)
 $ErrorActionPreference='Stop'
 $root=Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 $refs=(Resolve-Path -LiteralPath $SolidWorksApiKlasoru).Path
@@ -18,7 +18,7 @@ foreach($name in $names){Copy-Item -LiteralPath (Join-Path $refs $name) -Destina
 foreach($name in @('Pronom.PencereTanisi.exe','Pronom.PencereTanisi.exe.config')){Copy-Item -LiteralPath (Join-Path $build ('bin\Etiket.PencereTanisi\release\'+$name)) -Destination (Join-Path $payload 'Araclar')}
 foreach($name in @('BekleyenKayitlar.ps1','BekleyenKayitlarIslemleri.ps1','BekleyenKayitlariToparla.ps1','KayitSorunuBilgisi.ps1','YazilmamisKuyruguIptalEt.ps1')){Copy-Item -LiteralPath (Join-Path $PSScriptRoot $name) -Destination $payload}
 $collector=Join-Path $payload 'KayitSorunuBilgisi.ps1'
-$text=[IO.File]::ReadAllText($collector).Replace("[string]"+'$EklentiKlasoru='+"'C:\Pronom Eklenti'","[string]"+'$EklentiKlasoru=$PSScriptRoot')
+$text=[regex]::Replace([IO.File]::ReadAllText($collector),'\[string\]\$EklentiKlasoru=''[^'']*''','[string]$EklentiKlasoru=$PSScriptRoot')
 [IO.File]::WriteAllText($collector,$text,[Text.UTF8Encoding]::new($true))
 foreach($file in Get-ChildItem -LiteralPath (Join-Path $root 'outputs\src\Etiket.Kurulum') -File){if($file.Extension -in @('.cs','.csproj','.manifest','.config')){Copy-Item -LiteralPath $file.FullName -Destination $setup}}
 $hash=(Get-FileHash -LiteralPath (Join-Path $payload 'Pronom.SolidWorks.dll') -Algorithm SHA256).Hash

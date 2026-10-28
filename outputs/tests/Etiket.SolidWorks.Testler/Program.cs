@@ -17,8 +17,9 @@ partial class Program
   try
   {
    if(args.Length==1&&args[0]=="--performans")return PerformansOlc();
-   if(args.Length==0){Kaydet27Kurallari();Kaydet25Kurallari();DxfAktarimTestleri();PerformansDogrulamaTestleri();ToparlanmaTestleri();KayitOncesiBaglamaTestleri();}
+   if(args.Length==0){Kaydet33Kurallari();DisAktarimTestleri();Kaydet31Kurallari();Kaydet29Kurallari();Kaydet28Kurallari();Kaydet27Kurallari();Kaydet25Kurallari();DxfAktarimTestleri();PerformansDogrulamaTestleri();ToparlanmaTestleri();KayitOncesiBaglamaTestleri();}
    if(args.Length==1&&args[0]=="--native-girdi"){NativeKaydetGirdiTestleri.Calistir();return 0;}
+   if(args.Length==1&&args[0]=="--native-aktarim"){NativeDisAktarimTestleri();return 0;}
    if(args.Length==1&&args[0]=="--native-ad"){NativeDosyaAdiTestleri.Calistir();return 0;}
    if(args.Length==2&&args[0]=="--http")HttpTesti(new Uri(args[1]));
    else if(args.Length==0){StandartKayitTestleri();BagimsizPencereKayitTestleri();OzelAdTestleri();HedefBaglamaTestleri();YuklemeKomutTestleri();BagimsizKayitTestleri();NativeAdAlaniTesti();ErtelenmisTaramaTesti();SurumTestleri();CallbackComTesti();GunlukTestleri();NativeAdDenemeTesti();}else throw new ArgumentException("Yalnızca --http test adresi desteklenir.");
@@ -410,7 +411,8 @@ partial class Program
  {
   Kontrol(SolidWorksSurumKurali.TestHedefiMi("31.0.1"),"2023 SP0.1 revizyonu yıl kontrolünden geçmeli.");
   Kontrol(SolidWorksSurumKurali.TestHedefiMi("31.1.0"),"Önceki 2023 SP1 hedefi korunmalı.");
-  Kontrol(!SolidWorksSurumKurali.TestHedefiMi("30.1.0"),"2022 bu test paketi tarafından kabul edilmemeli.");
+  foreach(var rev in new[]{"28.0.0","28.1.0","28.2.0","28.4.0","28.5.1","29.0.0","29.5.0","30.0.0","30.5.1","31.5.0"})Kontrol(SolidWorksSurumKurali.TestHedefiMi(rev),"2020–2023 SP aralığı kabul edilmeli: "+rev);
+  Kontrol(!SolidWorksSurumKurali.TestHedefiMi("27.5.0"),"2019 hedef dışında kalmalı.");
   Kontrol(!SolidWorksSurumKurali.TestHedefiMi("32.0.1"),"2024 bu test paketi tarafından kabul edilmemeli.");
   Kontrol(!SolidWorksSurumKurali.TestHedefiMi("31.-1.0"),"Ön sürüm kabul edilmemeli.");
   Kontrol(!SolidWorksSurumKurali.TestHedefiMi("31.abc"),"Bozuk revizyon kabul edilmemeli.");

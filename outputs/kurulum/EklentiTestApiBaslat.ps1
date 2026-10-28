@@ -1,4 +1,4 @@
-﻿param([Parameter(Mandatory=$true)][string]$IpAdresi,[string]$TestVeritabani='SolidWorksAutomation_ApiTest_20261012_01')
+﻿param([Parameter(Mandatory=$true)][string]$IpAdresi,[string]$TestVeritabani='Pronom_OrnekTest')
 $ErrorActionPreference = 'Stop'
 if (!$TestVeritabani.StartsWith('SolidWorksAutomation_ApiTest_') -or $TestVeritabani -notmatch '^SolidWorksAutomation_ApiTest_[A-Za-z0-9_]+$') { throw 'Yalnızca ayrı test veritabanı adı kabul edilir.' }
 $ip = $null

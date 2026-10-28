@@ -1,0 +1,26 @@
+{
+  "Version": "2026.10.27-Numarasiz1",
+  "InputSHA256": "3DC9B480AEA685834F1844B66CA0A82240502435FE1767046946B00ACA932FFE",
+  "Files": [
+    {
+      "File": "dist/addin-v24/Pronom.Copilot.ProductCard.dll",
+      "SHA256": "AB0554B861DBFC711B66640081BC4932AE9EDB40564673C189E4BC9B97250623"
+    },
+    {
+      "File": "dist/addin-v24/SolidWorks.Interop.sldworks.dll",
+      "SHA256": "56785778D3D46021C4C71A88431B8109285964C3D2C807DB919C0141B7D7FB62"
+    },
+    {
+      "File": "dist/addin-v24/SolidWorks.Interop.swconst.dll",
+      "SHA256": "FA79BE2F75F5A25965AA6434E5051146E88BD4FCCDD0210CDA50FC618D71159E"
+    },
+    {
+      "File": "dist/addin-v24/SolidWorks.Interop.swpublished.dll",
+      "SHA256": "548AABB7B4A67B26AFD3D601641E843439EA171C3FE18BBDF777F2F80D2368EF"
+    },
+    {
+      "File": "dist/addin-v24/SolidWorksCopilot.Addin.dll",
+      "SHA256": "A6E17CDF62766DCFA49F2772D136F1458189D311BF2FC98D3929904A9F37E5E6"
+    }
+  ]
+}

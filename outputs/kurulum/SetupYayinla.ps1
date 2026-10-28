@@ -19,6 +19,38 @@ function DizinDogrula([string]$path){
   if($d.Exists -and ($d.Attributes -band [IO.FileAttributes]::ReparsePoint)){throw ('Yönlendirilmiş yayın klasörü kullanılamaz: '+$d.FullName)}
  }
 }
+function IndirmePaketiOlustur([string]$hedef){
+ Add-Type -AssemblyName System.IO.Compression.FileSystem
+ $zip=[IO.Compression.ZipFile]::Open($hedef,[IO.Compression.ZipArchiveMode]::Create)
+ try{
+  $null=[IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip,$SetupDosyasi,'Otomatik-Etiketleme-Kurulum.exe',[IO.Compression.CompressionLevel]::Optimal)
+  $entry=$zip.CreateEntry('README-KURULUM.txt')
+  $writer=[IO.StreamWriter]::new($entry.Open(),[Text.UTF8Encoding]::new($true))
+  try{
+   $writer.WriteLine('OTOMATIK ETIKETLEME - KURULUM VE GUNCELLEME')
+   $writer.WriteLine('Surum: '+$version.FileVersion)
+   $writer.WriteLine('')
+   $writer.WriteLine('1. ZIP dosyasinin tumunu bir klasore cikarin.')
+   $writer.WriteLine('2. SolidWorks un tum surumlerini kapatin.')
+   $writer.WriteLine('3. Otomatik-Etiketleme-Kurulum.exe dosyasini calistirin.')
+   $writer.WriteLine('4. Ilk kullanimda Kur, mevcut kurulumda Guncelle secenegini kullanin.')
+   $writer.WriteLine('5. Ilk kurulumda merkez API adresini girin. Bu adres, bu paketi indirdiginiz web sitesinin adresidir (ornek: http://MERKEZ:5082). Diger bilgisayarda 127.0.0.1 kullanmayin.')
+   $writer.WriteLine('6. Kurulum tamamlaninca SolidWorks u acin. Eklentiler listesinde eklentinin Etkin ve Baslangic kutularini kontrol edin.')
+   $writer.WriteLine('')
+   $writer.WriteLine('Ilk parca/montaj kaydinda otomatik P/M numarasi verilir. Normal Kaydet mevcut numarayi korur. Farkli Kaydet ve Bagimsiz Yap yeni dosya icin numara alir. Disa aktarmada yeni numara ayrilmaz.')
+   $writer.WriteLine('')
+   $writer.WriteLine('Bu paketteki EXE mevcut Pronom kurulumuyla uyumludur; kurulum penceresinde ve SolidWorks eklenti listesinde eski Pronom adi gorunebilir. Eski kurulumu kaldirmayin, Guncelle secenegini kullanin.')
+   $writer.WriteLine('Kurulum dosyasi SHA256: '+$BeklenenSHA256.ToUpperInvariant())
+  }finally{$writer.Dispose()}
+ }finally{$zip.Dispose()}
+ # Paketin tasidigi EXE ayni dogrulanmis kurulum olmalidir.
+ $read=[IO.Compression.ZipFile]::OpenRead($hedef)
+ try{
+  if($read.Entries.Count -ne 2 -or !$read.GetEntry('README-KURULUM.txt')){throw 'Indirme paketi icerigi eksik.'}
+  $stream=$read.GetEntry('Otomatik-Etiketleme-Kurulum.exe').Open();$sha=[Security.Cryptography.SHA256]::Create()
+  try{$hash=[BitConverter]::ToString($sha.ComputeHash($stream)).Replace('-','');if($hash -ine $BeklenenSHA256){throw 'ZIP icindeki kurulum dogrulanamadi.'}}finally{$sha.Dispose();$stream.Dispose()}
+ }finally{$read.Dispose()}
+}
 DizinDogrula $YedekKlasoru
 $id=[Guid]::NewGuid().ToString('N')
 $stages=@()
@@ -33,14 +65,19 @@ try{
   $stages+= [pscustomobject]@{Target=$target;Temp=$temp}
   [IO.File]::Copy($SetupDosyasi,$temp,$false)
   if((Get-FileHash -LiteralPath $temp).Hash -ine $BeklenenSHA256){throw 'Yayın kopyası doğrulanamadı.'}
+  $zipTarget=Join-Path $folder 'Otomatik-Etiketleme-Kurulum.zip'
+  if((Test-Path -LiteralPath $zipTarget) -and ((Get-Item -LiteralPath $zipTarget).Attributes -band [IO.FileAttributes]::ReparsePoint)){throw 'Yonlendirilmis ZIP degistirilemez.'}
+  $zipTemp=Join-Path $folder ('Otomatik-Etiketleme.'+$id+'.tmp')
+  $stages+= [pscustomobject]@{Target=$zipTarget;Temp=$zipTemp}
+  IndirmePaketiOlustur $zipTemp
  }
  foreach($stage in $stages){
   if(Test-Path -LiteralPath $stage.Target){
-   $backup=Join-Path $YedekKlasoru ($id+'-'+[Guid]::NewGuid().ToString('N')+'.exe')
+   $backup=Join-Path $YedekKlasoru ($id+'-'+[Guid]::NewGuid().ToString('N')+[IO.Path]::GetExtension($stage.Target))
    $null=New-Item -ItemType Directory -Path $YedekKlasoru -Force
    [IO.File]::Replace($stage.Temp,$stage.Target,$backup)
   }else{[IO.File]::Move($stage.Temp,$stage.Target)}
-  [pscustomobject]@{Surum=$version.FileVersion;SHA256=$BeklenenSHA256.ToUpperInvariant();Dosya=$stage.Target;IndirmeYolu='/indir/Pronom-Kurulum.exe'}
+  [pscustomobject]@{Surum=$version.FileVersion;SHA256=(Get-FileHash -LiteralPath $stage.Target).Hash;Dosya=$stage.Target;IndirmeYolu=('/indir/'+[IO.Path]::GetFileName($stage.Target))}
  }
 }finally{
  foreach($stage in $stages){if(Test-Path -LiteralPath $stage.Temp){Remove-Item -LiteralPath $stage.Temp}}

@@ -15,6 +15,16 @@ namespace Etiket.SolidWorks
  }
  public static class HedefAdresKurali
  {
+  public static string MasaustuCoz(string adres,string gorunenAd,string gercekYol)
+  {
+   if(string.IsNullOrWhiteSpace(gorunenAd)||string.IsNullOrWhiteSpace(gercekYol))return null;
+   var metin=(adres??"").Trim();
+   if(!string.Equals(metin,"Adres: "+gorunenAd,StringComparison.OrdinalIgnoreCase)
+    &&!string.Equals(metin,"Address: "+gorunenAd,StringComparison.OrdinalIgnoreCase))return null;
+   // Yalnız Windows'un döndürdüğü özel klasör adı. Boş adres, breadcrumb
+   // veya başka bir sanal klasör için Masaüstü tahmini yapılmaz.
+   return Coz("Adres: "+gercekYol);
+  }
   public static string Coz(string adres)
   {
    var s=(adres??"").Trim();

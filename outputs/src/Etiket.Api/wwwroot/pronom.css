@@ -103,3 +103,15 @@ dl{margin:0;border-top:1px solid #eaf0ec;padding-top:17px;font-size:11px}dl div{
 a.buton{text-decoration:none}
 a.buton:focus-visible{outline:3px solid #65b6a9;outline-offset:3px}
 @media(max-width:700px){.baslik{flex-wrap:wrap}.baslik-islemleri{flex-basis:100%;justify-content:flex-start}}
+/* İndirmeler */
+.indirme-kartlari{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;max-width:1100px}
+.indirme-karti{display:flex;flex-direction:column;padding:28px;border:1px solid var(--cizgi);border-radius:var(--kenar);background:#fff;box-shadow:var(--golge)}
+.indirme-kart-basligi{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:24px}
+.indirme-simgesi{display:grid;place-items:center;width:48px;height:48px;border-radius:13px;background:#e8f3ef;color:var(--vurgu);font-size:26px;font-weight:750}
+.indirme-simgesi.copilot{background:#edf0fa;color:#566b9c}
+.indirme-karti h2{font-size:21px;margin:0 0 10px;letter-spacing:-.4px}.indirme-karti p{font-size:13px;color:var(--soluk);margin:0;line-height:1.7}
+.indirme-karti ul{padding-left:18px;color:var(--soluk);font-size:12px;line-height:1.9;margin:18px 0 26px}
+.indirme-alt{display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin-top:auto}
+
+@media(max-width:850px){.indirme-kartlari{grid-template-columns:1fr}.indirme-karti{padding:23px}.indirme-kart-basligi{margin-bottom:18px}}
+@media(max-width:700px){.menu{gap:6px;padding:10px 6px;font-size:10px}.menu svg{flex-shrink:0;width:14px;height:14px}.yan{gap:4px;padding-left:8px;padding-right:8px}}

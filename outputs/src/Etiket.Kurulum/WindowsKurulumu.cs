@@ -30,11 +30,12 @@ namespace Pronom.Kurulum
    {
     using(var fx=root.OpenSubKey(@"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full"))
      if(Convert.ToInt32(fx?.GetValue("Release",0))<528040)throw new InvalidOperationException(".NET Framework 4.8 gerekli.");
-    using(var sw=root.OpenSubKey(@"SOFTWARE\SolidWorks\SOLIDWORKS 2023\Setup"))
+    var yillar=KurulumCekirdegi.SolidWorksKurulumYillari(yil=>
     {
-     var folder=sw?.GetValue("SolidWorks Folder") as string;
-     if(string.IsNullOrWhiteSpace(folder)||!File.Exists(Path.Combine(folder,"SLDWORKS.exe")))throw new InvalidOperationException("SolidWorks 2023 kurulumu bulunamadı.");
-    }
+     using(var sw=root.OpenSubKey(@"SOFTWARE\SolidWorks\SOLIDWORKS "+yil+@"\Setup"))
+      return sw?.GetValue("SolidWorks Folder") as string;
+    },File.Exists);
+    if(yillar.Length==0)throw new InvalidOperationException("SolidWorks 2020, 2021, 2022 veya 2023 kurulumu bulunamadı.");
    }
    KapaliMi();
   }

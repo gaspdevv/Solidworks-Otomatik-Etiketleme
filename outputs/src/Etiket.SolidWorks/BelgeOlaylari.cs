@@ -68,12 +68,10 @@ namespace Etiket.SolidWorks
   {
    if(programatikBagimsiz())return 0;
    KayitOlayTanisi.Yaz("FileSaveAsNotify2","tur="+tur+" onerilen="+dosyaAdi);
-   if(DxfAktarimKurali.DxfAdiMi(dosyaAdi)&&DxfAktarimKurali.Eslesiyor(tur,model.GetPathName(),dosyaAdi))
+   if(DisAktarimKurali.HariciDosyaMi(dosyaAdi))
    {
-    if(nativeDenemeAktif()||standartPencereAktif()||standartKayit.Bekliyor||bekleyen!=null||isleyiciIcinde||nativeKaydetmeBekleniyor||kopyaSirada||programatikKopya)
-    {bildir("Önce önceki CAD kayıt işlemini tamamlayın. DXF için yeni numara ayrılmadı.");return 1;}
-    KayitOlayTanisi.Yaz("DxfKayitSerbest","kaynak="+model.GetPathName()+" hedef="+dosyaAdi+" merkeziIslem=yok");
-    return 0; // CAD kimligi/ozelligi/numara/HTTP degismez; native DXF devam eder.
+    KayitOlayTanisi.Yaz("DisAktarimKayitSerbest","hedef="+dosyaAdi+" merkeziIslem=yok");
+    return 0; // Model GUID/ad/HTTP degismez. Donusturmeyi SolidWorks yapar.
    }
    if(nativeDenemeAktif())return 0; // Pencere denemesinde native UI; gerçek Save ayrı olarak engellenir.
    if(NativeAdDenemePenceresi.StandartKayitAcik)
@@ -128,6 +126,7 @@ namespace Etiket.SolidWorks
   {
    if(programatikBagimsiz())return 0;
    KayitOlayTanisi.Yaz("FileSaveNotify","tur="+tur+" hedef="+dosyaAdi);
+   if(DisAktarimKurali.HariciDosyaMi(dosyaAdi))return 0;
    if(nativeDenemeAktif())return 1;
    if(NativeAdDenemePenceresi.StandartKayitAcik)
    {
@@ -164,6 +163,7 @@ namespace Etiket.SolidWorks
   {
    if(programatikBagimsiz())return 0;
    KayitOlayTanisi.Yaz("FileSavePostNotify","tur="+tur+" kaydetmeTuru="+kaydetmeTuru+" hedef="+dosyaAdi);
+   if(DisAktarimKurali.HariciDosyaMi(dosyaAdi))return 0; // Export, bekleyen CAD isleminin kaniti degildir.
    if(NativeAdDenemePenceresi.StandartKayitAcik)
    {
     if(!standartKayit.Bekliyor)return 0;
@@ -238,7 +238,9 @@ namespace Etiket.SolidWorks
     {
      var secenek=(int)swSaveAsOptions_e.swSaveAsOptions_Silent|
       (bekleyen.KaydetmeBicimi==KaydetmeBicimi.KopyaVeAc?(int)swSaveAsOptions_e.swSaveAsOptions_CopyAndOpen:(int)swSaveAsOptions_e.swSaveAsOptions_Copy);
-     basarili=model.Extension.SaveAs3(hedef,(int)swSaveAsVersion_e.swSaveAsCurrentVersion,secenek,null,null,ref hata,ref uyari);
+     // SaveAs3 ancak 2020 SP2 ile geldi. Gelişmiş referans seçenekleri
+     // kullanmadığımız bu yolda SaveAs2, 2020 SP0/SP1'i de kapsar.
+     basarili=model.Extension.SaveAs2(hedef,(int)swSaveAsVersion_e.swSaveAsCurrentVersion,secenek,null,"",false,ref hata,ref uyari);
     }
     finally{programatikKopya=false;KaynakOzelliginiGeriYukle();}
     yonetici.ApiKaydetmeTamamlandi(bekleyen,hedef,basarili,hata);bekleyen=null;

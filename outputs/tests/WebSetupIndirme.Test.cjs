@@ -4,7 +4,7 @@ const path=require('node:path');
 const crypto=require('node:crypto');
 const root=path.resolve(__dirname,'../..');
 const base=process.argv[2]||'http://127.0.0.1:5082';
-const expected=process.argv[3]||path.join(root,'outputs/dagitim/Pronom-SolidWorks2023-DXF24-Kurulum.exe');
+const expected=process.argv[3]||path.join(root,'outputs/src/Etiket.Api/wwwroot/indir/Otomatik-Etiketleme-Kurulum.zip');
 const out=process.argv[4]||path.join(root,'work/web-setup-kontrol');
 const tarayiciDiski=process.env.PRONOM_TARAYICI_DISK_TESTI!=='0';
 let count=0;
@@ -25,7 +25,8 @@ const hash=data=>crypto.createHash('sha256').update(data).digest('hex');
     return route.continue();
    });
    await page.goto(base,{waitUntil:'networkidle'});
-   const link=page.getByRole('link',{name:'Eklentiyi indir',exact:true});
+   await page.getByRole('button',{name:'İndirmeler',exact:true}).click();
+   const link=page.getByRole('link',{name:'Etiketleme eklentisini indir',exact:true});
    assert(await link.isVisible(),name+': indirme dugmesi gorunur');
    const rect=await link.boundingBox();
    assert(rect.x>=0&&rect.x+rect.width<=width,name+': dugme ekrana sigar');
@@ -37,9 +38,9 @@ const hash=data=>crypto.createHash('sha256').update(data).digest('hex');
    for(let i=0;i<2;i++){
     const done=page.waitForEvent('download');await link.click();const download=await done;
     const url=new URL(download.url());urls.push(url.href);
-    assert(url.origin===new URL(base).origin&&url.pathname==='/indir/Pronom-Kurulum.exe',name+': ayni merkezden indirir');
+    assert(url.origin===new URL(base).origin&&url.pathname==='/indir/Otomatik-Etiketleme-Kurulum.zip',name+': ayni merkezden indirir');
     assert(!!url.searchParams.get('v'),name+': indirme onbellegi yenilenir');
-    const file=path.join(out,name+'-'+i+'.exe');
+    const file=path.join(out,name+'-'+i+'.zip');
     try{
      if(tarayiciDiski)await download.saveAs(file);
      else{
@@ -54,8 +55,8 @@ const hash=data=>crypto.createHash('sha256').update(data).digest('hex');
      try{const dp=await ctx.newPage();await dp.goto('chrome://downloads/');tanim=await dp.evaluate(()=>document.querySelector('downloads-manager')?.shadowRoot?.querySelector('#downloadsList')?.items);await dp.close();}catch{}
      console.error(JSON.stringify({indirme:download.url(),hata:await download.failure(),tarayiciKaydi:logs,indirmeKaydi:tanim},(k,v)=>typeof v==='bigint'?v.toString():v));throw e;
     }
-    assert(hash(await fs.readFile(file))===expectedHash,name+': indirilen EXE dogru son paket');
-    assert(download.suggestedFilename()==='Pronom-Kurulum.exe',name+': anlasilir dosya adi');
+    assert(hash(await fs.readFile(file))===expectedHash,name+': indirilen ZIP dogru son paket');
+    assert(download.suggestedFilename()==='Otomatik-Etiketleme-Kurulum.zip',name+': anlasilir dosya adi');
    }
    assert(urls[0]!==urls[1],name+': tekrar tiklamada eski onbellek kullanilmaz');
    assert(errors.length===0,name+': JavaScript hatasi yok');

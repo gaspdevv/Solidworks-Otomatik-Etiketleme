@@ -25,6 +25,13 @@ internal static class Program
   if(args.Length==5&&args[0]=="--hedef")return HedefiOku(args);
   if(args.Length==6&&args[0]=="--hedef-cift")return HedefiOku(args,true);
   if(args.Length==1&&args[0]=="--kendi-testleri")return KendiTestleri();
+  if(args.Length==1&&args[0]=="--masaustu-testleri")
+  {
+   var sonuc=1;var test=new Thread(()=>sonuc=MasaustuAdresTestleri.Calistir()){IsBackground=true};
+   test.SetApartmentState(ApartmentState.STA);test.Start();
+   if(!test.Join(20000)){Console.Error.WriteLine("Masaustu test penceresi zamaninda tamamlanmadi.");return 2;}
+   return sonuc;
+  }
   if(args.Length!=2||args[0]!="--ad"||string.IsNullOrWhiteSpace(args[1])||args[1].Length>60)
   {Console.Error.WriteLine("Kullanım: Pronom.PencereTanisi.exe --ad AnaKlasor");return 1;}
   rapor=Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"PencereTanisi-sonuc.txt");
@@ -74,6 +81,12 @@ internal static class Program
     using(var p=Process.GetProcessById(pid))if(p.ProcessName!="SLDWORKS")throw new InvalidOperationException("Hedef süreç SolidWorks değil.");
     GetWindowThreadProcessId(hwnd,out var sahip);
     if(sahip!=(uint)pid||!IsWindowVisible(hwnd)||Sinif(hwnd)!="#32770"||!KayitPenceresiMi(Metin(hwnd),Metin(GetDlgItem(hwnd,1))))throw new InvalidOperationException("İstenen kayıt penceresi açık değil.");
+    var klasor=AdresAlaniniOku(pid,hwnd);
+    GetWindowThreadProcessId(hwnd,out sahip);if(sahip!=(uint)pid||!IsWindowVisible(hwnd))throw new InvalidOperationException("Kayıt penceresi okuma sırasında kapandı.");
+    return new Etiket.SolidWorks.HedefPencereYaniti{IslemId=islem,SorguId=sorgu,SurecId=pid,Pencere=hwnd.ToInt64(),Klasor=klasor};
+ }
+ internal static string AdresAlaniniOku(int pid,IntPtr hwnd)
+ {
     var adresKokleri=new List<IntPtr>();var n=0;
     EnumChildWindows(hwnd,(h,v)=>{if(++n>192)return false;if(IsWindowVisible(h)&&Sinif(h)=="Address Band Root")adresKokleri.Add(h);return true;},IntPtr.Zero);
     if(adresKokleri.Count==0&&n<=192)throw new Etiket.SolidWorks.HedefAdresHazirDegilHatasi("Adres alanı henüz hazır değil.");
@@ -86,7 +99,10 @@ internal static class Program
      if(b.ProcessId!=pid)throw new InvalidOperationException("Adres sağlayıcısı farklı süreçte.");
      // Kullanıcı cihazında doğrulanan tek güncel adres toolbar'ı; breadcrumb parçaları kullanılmaz.
      if(!b.IsOffscreen&&b.ControlType==ControlType.ToolBar&&b.ClassName=="ToolbarWindow32"&&b.AutomationId=="1001")
-     {var yol=Etiket.SolidWorks.HedefAdresKurali.Coz(b.Name);if(yol!=null)yollar.Add(yol);}
+     {
+      var yol=Etiket.SolidWorks.HedefAdresKurali.Coz(b.Name)??MasaustuAdresCozucu.Coz(b.Name);
+      if(yol!=null)yollar.Add(yol);
+     }
      if(a.Value>=4)continue;
      var c=walker.GetFirstChild(a.Key);var kardes=0;
      while(c!=null&&kardes++<12&&q.Count<40){q.Enqueue(new KeyValuePair<AutomationElement,int>(c,a.Value+1));c=walker.GetNextSibling(c);}
@@ -95,8 +111,7 @@ internal static class Program
     if(q.Count>0)throw new InvalidOperationException("Adres ağacı sınırı aşıldı.");
     if(yollar.Count==0)throw new Etiket.SolidWorks.HedefAdresHazirDegilHatasi("Tek ve tam hedef klasör yolu henüz bulunamadı.");
     if(yollar.Count!=1)throw new InvalidOperationException("Birden fazla hedef klasör yolu bulundu.");
-    GetWindowThreadProcessId(hwnd,out sahip);if(sahip!=(uint)pid||!IsWindowVisible(hwnd))throw new InvalidOperationException("Kayıt penceresi okuma sırasında kapandı.");
-    foreach(var yol in yollar)return new Etiket.SolidWorks.HedefPencereYaniti{IslemId=islem,SorguId=sorgu,SurecId=pid,Pencere=hwnd.ToInt64(),Klasor=yol};
+    foreach(var yol in yollar)return yol;
     throw new InvalidOperationException("Hedef bulunamadi.");
  }
  static void Oku()

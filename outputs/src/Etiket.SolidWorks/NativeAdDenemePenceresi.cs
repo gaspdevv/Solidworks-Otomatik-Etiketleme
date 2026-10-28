@@ -21,7 +21,9 @@ namespace Etiket.SolidWorks
   Action<KaydetmeIslemi,string> kayit;Action<string> bildir;
   bool kayitDogrulaniyor,devretHazir;string sonAd="";IntPtr kayitDialog;
   KaydetmeIslemi devredilen;
-  bool standartKayit,nativeKomutYetkili;
+  bool standartKayit,nativeKomutYetkili,iptalIstendi,pencereKapandi;
+  bool disAktarimYetkili,disAktarimAdi;string disAktarimSonAd="",disAktarimFiltre="";
+  IntPtr izlenenDialog;
   IntPtr hook;string otomatikAd="",bekleyenKaynak="";
   static readonly UIntPtr AltKimlik=new UIntPtr(0x50524F4E);
   delegate IntPtr HookIsleyici(int kod,IntPtr w,IntPtr l);
@@ -54,6 +56,9 @@ namespace Etiket.SolidWorks
   public static bool StandartKayitAcik=>File.Exists(Path.Combine(EklentiAyarlari.KullaniciKlasoru,"StandartKayit.acik"));
   public bool Aktif=>islem.Aktif&&hook!=IntPtr.Zero;
   public bool RezervasyonBekliyor=>islem.Aktif;
+  public bool KapaliPencereSonucuBekliyor=>pencereKapandi||(izlenenDialog!=IntPtr.Zero&&!IsWindow(izlenenDialog));
+  public bool KapanisTakibiVar=>izlenenDialog!=IntPtr.Zero&&islem.Aktif;
+  public string KapanisTanisi=>"devret="+devretHazir+" kapandi="+KapaliPencereSonucuBekliyor;
   public bool KaynakEslesiyor(string kaynak)=>string.Equals(bekleyenKaynak,kaynak??"",StringComparison.OrdinalIgnoreCase);
   public bool IptalEslesiyor(string kaynak)=>KaynakEslesiyor(kaynak)
    ||(!string.IsNullOrEmpty(otomatikAd)&&string.Equals(Path.GetFileNameWithoutExtension(kaynak??""),otomatikAd,StringComparison.OrdinalIgnoreCase));
@@ -70,7 +75,7 @@ namespace Etiket.SolidWorks
     KayitOlayTanisi.Yaz("NativeKayitBekliyor","islem="+islem.IslemId+" asama="+islem.BekleyenAsama);
     throw new InvalidOperationException("Önceki kayıt sonucu bekleniyor; işlem kimliği korundu. İşlem: "+islem.IslemId+". Aşama: "+islem.BekleyenAsama);
    }
-   this.kayit=kayit;this.bildir=bildir;this.standartKayit=standartKayit;nativeKomutYetkili=false;devretHazir=false;devredilen=null;
+   this.kayit=kayit;this.bildir=bildir;this.standartKayit=standartKayit;disAktarimYetkili=false;disAktarimAdi=false;nativeKomutYetkili=false;devretHazir=false;devredilen=null;iptalIstendi=false;pencereKapandi=false;izlenenDialog=IntPtr.Zero;
    bekleyenKaynak=kaynak??"";
    if(hook==IntPtr.Zero)
    {
@@ -99,6 +104,7 @@ namespace Etiket.SolidWorks
    var kaydet=GetDlgItem(dialog,1);var iptal=GetDlgItem(dialog,2);
    if(adaylar.Count!=1||Sinif(kaydet)!="Button"||Sinif(iptal)!="Button")return;
    if(!NativeKayitPenceresiKurali.Eslesiyor(Metin(dialog),Metin(kaydet)))return;
+   izlenenDialog=dialog;
    oncekiDurumlar.Add(dialog,new PencereDurumu{Dialog=dialog,Edit=adaylar[0],Kaydet=kaydet,Metin=Metin(adaylar[0]),SaltOkunur=(GetWindowLong(adaylar[0],-16)&0x0800)!=0,KaydetAcik=IsWindowEnabled(kaydet)});
    // HCBT_ACTIVATE: native pencere etkinleşmeden önce deneme Kaydet düğmesini kapatır.
    EnableWindow(kaydet,false);
@@ -142,6 +148,16 @@ namespace Etiket.SolidWorks
    if(veri.ToUInt64()==1&&m==0x000A&&w!=IntPtr.Zero&&(kayit==null||kayitDogrulaniyor)){EnableWindow(h,false);return IntPtr.Zero;}
    if(m==0x0111&&(w.ToInt64()&0xffff)==1)
    {
+    if(disAktarimYetkili)
+    {
+     disAktarimYetkili=false;
+     try
+     {
+      if(!oncekiDurumlar.TryGetValue(h,out var d)||Metin(d.Edit)!=disAktarimSonAd||SeciliFiltre(h)!=disAktarimFiltre||!DisAktarimKurali.HariciFiltreMi(disAktarimFiltre))throw new IOException("Dışa aktarma biçimi veya adı değişti; yeniden Kaydet seçin.");
+      return DefSubclassProc(h,m,w,l); // Yalniz bu dis format icin tek native komut.
+     }
+     catch(Exception hata){KayitHatasi(hata);return IntPtr.Zero;}
+    }
     if(standartKayit&&nativeKomutYetkili)
     {
      nativeKomutYetkili=false;
@@ -160,6 +176,19 @@ namespace Etiket.SolidWorks
     }
     if(kayit!=null)KaydetIstendi(h);else KayitOlayTanisi.Yaz("NativeAdKaydetEngellendi","Bu sürüm yalnızca pencere denemesidir.");return IntPtr.Zero;
    }
+   // Format secimi native pencerede degistiyse ayrilan yeni CAD adi yerine
+   // kaynak numarayi goster. Kaydet aninda filtre ve son ad yeniden okunur.
+   if(m==0x0111&&((w.ToInt64()>>16)&0xffff)==1&&Sinif(l)=="ComboBox"&&!kayitDogrulaniyor&&!islem.KaydaDevredildi)
+   {
+    var sonuc=DefSubclassProc(h,m,w,l);
+    try{FormatAdiniGuncelle(h);}catch(Exception hata){KayitOlayTanisi.Yaz("DisAktarimAdHatasi",hata.Message);}
+    return sonuc;
+   }
+   // 2020, PromptForFilenameNotify/Cancelled=26 bildirimini tanımlamaz.
+   // Yalnız kendi kayıt penceresindeki açık İptal veya X isteğini hatırla;
+   // HTTP iptali native callback içinde değil, CommandClose sonrasında yapılır.
+   if(oncekiDurumlar.ContainsKey(h)&&(m==0x0010||(m==0x0111&&(w.ToInt64()&0xffff)==2)))iptalIstendi=true;
+   if(m==0x0082&&oncekiDurumlar.ContainsKey(h))pencereKapandi=true;
    if(m==0x0082){RemoveWindowSubclass(h,altIsleyici,AltKimlik);pencereler.Remove(h);oncekiDurumlar.Remove(h);}
    return DefSubclassProc(h,m,w,l);
   }
@@ -185,6 +214,45 @@ namespace Etiket.SolidWorks
    if(n>=ad.Capacity-1)throw new IOException("Dosya adı çok uzun.");
    return BagimsizDosyaAdiKurali.Tamamla(ad.ToString(),islem.BelgeTuru);
   }
+  string SeciliFiltre(IntPtr dialog)
+  {
+   var filtreler=new List<string>();
+   EnumChildWindows(dialog,(h,v)=>{if(IsWindowVisible(h)&&Sinif(h)=="ComboBox"){
+    var metin=Metin(h);if(DisAktarimKurali.FiltreUzantilari(metin).Length>0)filtreler.Add(metin);
+   }return true;},IntPtr.Zero);
+   return filtreler.Count==1?filtreler[0]:"";
+  }
+  void FormatAdiniGuncelle(IntPtr dialog)
+  {
+   if(!oncekiDurumlar.TryGetValue(dialog,out var d))return;
+   var filtre=SeciliFiltre(dialog);
+   if(DisAktarimKurali.HariciFiltreMi(filtre))
+   {
+    var ad=DisAktarimKurali.KaynakAdiyla(bekleyenKaynak,filtre,Metin(d.Edit));
+    adDurumu.KullaniciDuzenliyor();SendMessage(d.Edit,0x000C,IntPtr.Zero,ad);disAktarimAdi=true;
+   }
+   else if(disAktarimAdi&&filtre!="")
+   {
+    adDurumu.KullaniciDuzenliyor();SendMessage(d.Edit,0x000C,IntPtr.Zero,otomatikAd);disAktarimAdi=false;
+   }
+  }
+  bool DisAktarimiBaslat(IntPtr dialog)
+  {
+
+   var filtre=SeciliFiltre(dialog);
+   if(!DisAktarimKurali.HariciFiltreMi(filtre))return false;
+   var d=oncekiDurumlar[dialog];
+   var ad=DisAktarimKurali.KaynakAdiyla(bekleyenKaynak,filtre,Metin(d.Edit));
+   adDurumu.KullaniciDuzenliyor();SendMessage(d.Edit,0x000C,IntPtr.Zero,ad);
+   NativeDosyaAdiAktarimi.Esitle(dialog,d.Edit,ad);
+   // Henuz CAD yazimi devredilmedi. Kullanilmayan rezervasyon iptal edilir;
+   // ag hatasinda IptalBekliyor kalici kalir, export icin yeni numara alinmaz.
+   try{islem.IptalEt();}catch(Exception hata){KayitOlayTanisi.Yaz("DisAktarimIptalBekliyor","islem="+islem.IslemId+" "+hata.Message);}
+   disAktarimSonAd=ad;disAktarimFiltre=filtre;disAktarimYetkili=true;disAktarimAdi=true;
+   KayitOlayTanisi.Yaz("DisAktarimNativeKaydet","kaynak="+bekleyenKaynak+" hedefAd="+ad+" merkeziKayit=yok");
+   if(!PostMessage(dialog,0x0111,new IntPtr(1),IntPtr.Zero)){disAktarimYetkili=false;throw new IOException("Dışa aktarma Kaydet komutu gönderilemedi.");}
+   return true;
+  }
   void BicimiDogrula(IntPtr dialog)
   {
    var adet=0;var uzanti=islem.BelgeTuru=="P"?"*.sldprt":"*.sldasm";
@@ -196,6 +264,15 @@ namespace Etiket.SolidWorks
    if(kayitDogrulaniyor||islem.KaydaDevredildi)return;
    try
    {
+    if(DisAktarimiBaslat(dialog))return;
+    if(!islem.Aktif||islem.BekleyenAsama=="IptalBekliyor")
+    {
+     // Export secenekleri iptal edilip ayni pencerede yerel CAD'e donulebilir.
+     var klasor=Path.GetDirectoryName(bekleyenKaynak??"");
+     if(!Directory.Exists(klasor))klasor=Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+     otomatikAd=Path.GetFileNameWithoutExtension(islem.Hazirla(Path.GetExtension(bekleyenKaynak??"").Equals(".sldasm",StringComparison.OrdinalIgnoreCase)?"M":"P",klasor,kayit!=null,standartKayit));
+     adDurumu.KullaniciDuzenliyor();SendMessage(oncekiDurumlar[dialog].Edit,0x000C,IntPtr.Zero,otomatikAd);disAktarimAdi=false;
+    }
     sonAd=AdiOku(dialog);BicimiDogrula(dialog);
     var gorunen=Metin(oncekiDurumlar[dialog].Edit);
     NativeDosyaAdiAktarimi.Esitle(dialog,oncekiDurumlar[dialog].Edit,gorunen);
@@ -255,6 +332,11 @@ namespace Etiket.SolidWorks
    };
   }
   public void KayitSonucunuAl()=>islem.KayitSonucunuAl();
+  public void KomutKapanisiniTamamla()
+  {
+   islem.KayitSonucunuAl();
+   islem.PencereIptaliniTamamla(iptalIstendi);
+  }
   void HedefIzlemeyiDurdur()
   {
    if(hedefSayaci!=null){hedefSayaci.Stop();hedefSayaci.Tick-=HedefTick;hedefSayaci.Dispose();hedefSayaci=null;}
@@ -282,7 +364,7 @@ namespace Etiket.SolidWorks
     {SendMessage(durum.Edit,0x000C,IntPtr.Zero,durum.Metin);SendMessage(durum.Edit,0x00CF,new IntPtr(durum.SaltOkunur?1:0),IntPtr.Zero);}
     if(IsWindow(durum.Kaydet)&&Sinif(durum.Kaydet)=="Button"&&GetDlgCtrlID(durum.Kaydet)==1)EnableWindow(durum.Kaydet,durum.KaydetAcik);
    }
-   oncekiDurumlar.Clear();
+   oncekiDurumlar.Clear();pencereKapandi=false;izlenenDialog=IntPtr.Zero;
    // Unload/crash, kaydetme iptali kanıtı değildir; kalan günlük otomatik iptal edilmez.
   }
  }

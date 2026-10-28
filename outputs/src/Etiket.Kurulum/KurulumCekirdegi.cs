@@ -26,14 +26,29 @@ namespace Pronom.Kurulum
   public const string DxfDll="650EC98C440A4D338DDB98D0F141E5F01FDFC24A7DD4CA3F64DF2155C3957B6C";
   public const string Kaydet25Dll="32DC633E46AAAD428B3516EA8D559E4D47810B5A13B11B9A0E696409A44D6983";
   public const string Kaydet26Dll="B6E859FCE2A8F41FB241F49205E2498D754EBC051570AAE65628832D63CB42E9";
-  public const string YeniDll="10335C585CA6B439099F3930259DBF0CC0A3FF0F0037591AC340C7E14BBA4D7B";
-  public static bool BilinenDllMi(string hash)=>hash==EskiDll||hash==PerformansDll||hash==DxfDll||hash==Kaydet25Dll||hash==Kaydet26Dll||hash==YeniDll;
+  public const string Kaydet27Dll="10335C585CA6B439099F3930259DBF0CC0A3FF0F0037591AC340C7E14BBA4D7B";
+  public const string Kaydet28Dll="6751FDB06B8701D9A36925CA12B123B475EE1EA25E6E826C3F01B052BE1B4EAA";
+  public const string Kaydet29Dll="E2B39771BFE8CADEA1634211976C7C24EF293F8019273A8C61C59406F262F071";
+  public const string Kaydet30Dll="33A45CA40F822B25D8156291947F835ACCFF4DCFF0D19F6DE6E2E45862A1FB0A";
+  public const string Kaydet31Dll="B3124BDE48EB0D5A5AAD3CE8D35C8A9CC1995CF56793AACCE5F4F49CB8EE2407";
+  public const string Kaydet32Dll="F2D3145A828003F7D40B569D5C253415760DB3223A25C74157623CE57818DC51";
+  public const string YeniDll="FEE4AFDD9BAC14D41795103AE4338B61434C7839B4590089D9F2E34564FCE8A7";
+  public static bool BilinenDllMi(string hash)=>hash==EskiDll||hash==PerformansDll||hash==DxfDll||hash==Kaydet25Dll||hash==Kaydet26Dll||hash==Kaydet27Dll||hash==Kaydet28Dll||hash==Kaydet29Dll||hash==Kaydet30Dll||hash==Kaydet31Dll||hash==Kaydet32Dll||hash==YeniDll;
+  public static int[] SolidWorksKurulumYillari(Func<int,string> klasorOku,Func<string,bool> dosyaVar)
+  {
+   if(klasorOku==null||dosyaVar==null)throw new ArgumentNullException();
+   return Enumerable.Range(2020,4).Where(yil=>
+   {
+    var klasor=klasorOku(yil);
+    return !string.IsNullOrWhiteSpace(klasor)&&dosyaVar(Path.Combine(klasor,"SLDWORKS.exe"));
+   }).ToArray();
+  }
   public static KurulumBilgisi KurulumDurumu(string kayitHash,bool hedefVar,bool hazir,bool paketSaglam)
   {
    if(kayitHash!=null&&!BilinenDllMi(kayitHash))throw new IOException("Mevcut eklenti sürümü tanınmıyor; dosyalar değiştirilmedi.");
    if(kayitHash==null&&!hedefVar)return new KurulumBilgisi{Dugme="Kur",Baslik="Eklentiyi kullanıma hazır hale getirin",Aciklama="İlk kurulum yapılacak."};
    if(hazir)return new KurulumBilgisi{Dugme="Kontrol et",Baslik="Pronom güncel",Aciklama="Güncel sürüm kurulu. Bağlantı ayarlarını düzenleyebilirsiniz."};
-   if(kayitHash==EskiDll||kayitHash==PerformansDll||kayitHash==DxfDll||kayitHash==Kaydet25Dll||kayitHash==Kaydet26Dll||kayitHash==YeniDll&&paketSaglam)return new KurulumBilgisi{Dugme="Güncelle",Baslik="Pronom'u güncelleyin",Aciklama=kayitHash!=YeniDll?"Kayıt penceresi ve bileşen ekleme kuyruğu düzeltmeleri kurulacak.":"Eklenti güncel. Kurulum ve bağlantı araçları güncellenecek."};
+   if(kayitHash==EskiDll||kayitHash==PerformansDll||kayitHash==DxfDll||kayitHash==Kaydet25Dll||kayitHash==Kaydet26Dll||kayitHash==Kaydet27Dll||kayitHash==Kaydet28Dll||kayitHash==Kaydet29Dll||kayitHash==Kaydet30Dll||kayitHash==Kaydet31Dll||kayitHash==Kaydet32Dll||kayitHash==YeniDll&&paketSaglam)return new KurulumBilgisi{Dugme="Güncelle",Baslik="Pronom'u güncelleyin",Aciklama=kayitHash!=YeniDll?"SolidWorks 2020–2023 için güncel kayıt düzeltmeleri kurulacak.":"Eklenti güncel. Kurulum ve bağlantı araçları güncellenecek."};
    return new KurulumBilgisi{Dugme="Onar",Baslik="Pronom kurulumunu tamamlayın",Aciklama="Eksik dosyalar veya eklenti kaydı onarılacak."};
   }
   public static string Hash(string yol){using(var s=File.OpenRead(yol))using(var h=SHA256.Create())return BitConverter.ToString(h.ComputeHash(s)).Replace("-","");}
@@ -84,7 +99,7 @@ namespace Pronom.Kurulum
     }
    }
    if(adlar.Count!=liste.Length)throw new IOException("Paket dosyaları eksik.");
-   if(Hash(AltYol(hedef,"Pronom.SolidWorks.dll"))!=YeniDll)throw new IOException("Kaydet27 DLL doğrulanamadı.");
+   if(Hash(AltYol(hedef,"Pronom.SolidWorks.dll"))!=YeniDll)throw new IOException("Kaydet33 DLL doğrulanamadı.");
   }
   public static void MakineDosyalari(string kaynak,string hedef,Action<string> kaydet,Action<string> geriKaydet,Action kapaliMi,Action<string,string> kopyala=null)
   {
