@@ -1,4 +1,4 @@
-﻿:root{--zemin:#edf1f1;--yuzey:#fff;--yazi:#183238;--soluk:#63777b;--cizgi:#e0e8e7;--vurgu:#14796d;--yesil:#18846d;--koyu:#142f36;--kenar:14px;--golge:0 3px 12px #163a3305}
+:root{--zemin:#edf1f1;--yuzey:#fff;--yazi:#183238;--soluk:#63777b;--cizgi:#e0e8e7;--vurgu:#14796d;--yesil:#18846d;--koyu:#142f36;--kenar:14px;--golge:0 3px 12px #163a3305}
 *{box-sizing:border-box}
 body{margin:0;background:var(--zemin);font:14px/1.5 'Segoe UI',Arial,sans-serif;color:var(--yazi);-webkit-font-smoothing:antialiased}
 button,input,select{font:inherit}button{cursor:pointer}button:disabled{cursor:default;opacity:.42}

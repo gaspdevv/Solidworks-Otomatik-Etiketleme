@@ -1,4 +1,4 @@
-﻿<Solution>
+<Solution>
   <Folder Name="/Kaynak/">
     <Project Path="src/Etiket.Api/Etiket.Api.csproj" />
     <Project Path="src/Etiket.SolidWorks/Etiket.SolidWorks.csproj" />

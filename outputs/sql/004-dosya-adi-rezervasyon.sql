@@ -1,4 +1,4 @@
-﻿IF EXISTS(SELECT 1 FROM sys.indexes WHERE object_id=OBJECT_ID(N'dbo.Rezervasyonlar') AND name=N'UX_Rezervasyonlar_AktifDosyaAdi') THROW 51114,N'005 kurulmuş ortamda eski 004 çalıştırılmaz; 005 kullanın.',1;
+IF EXISTS(SELECT 1 FROM sys.indexes WHERE object_id=OBJECT_ID(N'dbo.Rezervasyonlar') AND name=N'UX_Rezervasyonlar_AktifDosyaAdi') THROW 51114,N'005 kurulmuş ortamda eski 004 çalıştırılmaz; 005 kullanın.',1;
 -- 004: yeni adlandırma ve rezervasyon akışı. SSMS'de HEDEF veritabanını seçin.
 -- Yeni ortam: önce 001; ardından bu dosya. 002/003 eski sözleşmedir.
 -- Kayıt içeren eski tabloyu dönüştürmez, sayaçları sıfırlamaz, test verisi eklemez.

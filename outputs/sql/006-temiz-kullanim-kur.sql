@@ -1,4 +1,4 @@
-﻿-- Yeni bos gercek kullanim ortami. P/M ilk numara1. Mevcut test/CAD/gunluk verileri korunur.
+-- Yeni bos gercek kullanim ortami. P/M ilk numara1. Mevcut test/CAD/gunluk verileri korunur.
 -- Yalniz secilen merkez SQL orneginde, API kapaliyken SSMS'de calistirilir.
 USE [master];
 SET NOCOUNT ON;

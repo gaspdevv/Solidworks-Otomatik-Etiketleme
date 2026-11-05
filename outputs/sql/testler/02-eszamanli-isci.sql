@@ -1,4 +1,4 @@
-﻿-- SSMS'de iki ayri sorgu sekmesinde calistirin. Ikinci sekmede @Isci = 2 yapin.
+-- SSMS'de iki ayri sorgu sekmesinde calistirin. Ikinci sekmede @Isci = 2 yapin.
 -- Ilk sorgudan sonra ikinci sorguyu 60 saniye icinde baslatin.
 USE [SolidWorksAutomation_EtiketTest_20261008];
 GO

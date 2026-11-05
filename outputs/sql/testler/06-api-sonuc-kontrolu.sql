@@ -1,4 +1,4 @@
-﻿USE [SolidWorksAutomation];
+USE [SolidWorksAutomation];
 GO
 IF (SELECT COUNT_BIG(*) FROM dbo.Documents) <> 0
  OR EXISTS (SELECT 1 FROM sys.sequences WHERE name IN (N'ParcaSayaci',N'MontajSayaci') AND last_used_value IS NOT NULL)

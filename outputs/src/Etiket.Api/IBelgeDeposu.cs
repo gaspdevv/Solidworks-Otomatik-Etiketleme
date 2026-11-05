@@ -1,4 +1,4 @@
-﻿namespace Etiket.Api;
+namespace Etiket.Api;
 
 public interface IBelgeDeposu
 {

@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Http.Json;
 using Etiket.Api;
 using Etiket.TestIstemcisi;

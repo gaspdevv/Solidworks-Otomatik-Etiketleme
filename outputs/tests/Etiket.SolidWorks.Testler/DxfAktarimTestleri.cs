@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using Etiket.SolidWorks;
 
 partial class Program
 {
  static void DxfAktarimTestleri()
  {
-  var kaynak=@"C:\CAD-Test\P00080.SLDPRT";
+  var kaynak=@"C:\Users\Kullanici\Desktop\Pronom Kayıt Testi\P00080.SLDPRT";
   Kontrol(!DosyaAdiKurali.AyniYol(kaynak,"P00080.DXF"),"Gercek logdaki eski tam yol karsilastirmasi DXF'yi tanimiyordu.");
   Kontrol(DxfAktarimKurali.Eslesiyor("P",kaynak,"P00080.DXF"),"Gercek Prompt ve FileSaveAsNotify2 adiyla DXF ayri native aktarimdir.");
   Kontrol(DxfAktarimKurali.Eslesiyor("P",kaynak,@"D:\DXF\P00080.dxf"),"Farkli hedef klasorde ayni kaynak adi desteklenir.");

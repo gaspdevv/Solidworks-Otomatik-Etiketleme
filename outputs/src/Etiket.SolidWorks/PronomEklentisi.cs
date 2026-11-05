@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -31,7 +31,9 @@ namespace Etiket.SolidWorks
   readonly Queue<Action> bosZamanIslemleri=new Queue<Action>();bool idleIslemiCalisiyor;
   readonly BagimsizKayitSirasi bagimsizSirasi=new BagimsizKayitSirasi();
   bool bagimsizYazimCalisiyor;
-  System.Windows.Forms.Timer kuyrukTaniSayaci;
+  System.Windows.Forms.Timer kuyrukTaniSayaci,iptalSayaci;
+  IptalGonderimSirasi iptalSirasi;Uri servisAdresi;KayitKurtarmaPenceresi kurtarmaPenceresi;
+  const int KurtarmaKomutGrubu=3401;ICommandManager kurtarmaKomutlari;
   int kuyrukIdleSayisi,kuyrukSorguSayisi,kuyrukTaniSayisi;
   string kuyrukSonSorgu="sorgulanmadi",sonNativeKapanisTanisi="";
   DateTime sonrakiKomutDogrulamasi=DateTime.MinValue;
@@ -46,20 +48,35 @@ namespace Etiket.SolidWorks
     if(!SolidWorksSurumKurali.TestHedefiMi(revizyon))throw new InvalidOperationException("Bu paket SolidWorks 2020–2023 içindir. Okunan API revizyonu: "+revizyon);
     KayitOlayTanisi.Yaz("SurumKontrolu",revizyon);
     adim="Kullanıcı ayarı ve işlem günlüğü";
-    servis=new HttpAdServisi(EklentiAyarlari.ApiAdresi());
+    servisAdresi=EklentiAyarlari.ApiAdresi();servis=new HttpAdServisi(servisAdresi);
     gunluk=new KaliciIslemGunlugu(Path.Combine(EklentiAyarlari.KullaniciKlasoru,"Islemler"));
     yonetici=new KaydetmeIslemYoneticisi(servis,gunluk);
+    var adres=servisAdresi;
+    iptalSirasi=new IptalGonderimSirasi(gunluk,()=>new HttpAdServisi(adres));
+    iptalSayaci=new System.Windows.Forms.Timer{Interval=15000};
+    iptalSayaci.Tick+=(s,e)=>iptalSirasi?.Baslat();iptalSayaci.Start();iptalSirasi.Baslat();
     // Native araçlar yalnızca Bağımsız Yap çağrısında oluşturulur.
 
     belgeTaramasi=new ErtelenmisBelgeTaramasi(BelgeleriBagla);
     adim="Eklenti callback kaydı";
     if(!uygulama.SetAddinCallbackInfo2(0,this,Cookie))throw new InvalidOperationException("SolidWorks callback kaydı oluşturulamadı.");
+    adim="Kayıt toparlama menüsü";
+    // CommandManager, eklenti komutunu normal menu/ozellestirme yasam dongusune baglar.
+    kurtarmaKomutlari=(ICommandManager)uygulama.GetCommandManager(Cookie);
+    var menuHatasi=0;
+    var grup=kurtarmaKomutlari.CreateCommandGroup2(KurtarmaKomutGrubu,"Otomatik Etiketleme","Kayıt durumunu güvenle kontrol eder.","Kayıtları toparla",-1,true,ref menuHatasi);
+    if(grup==null||menuHatasi!=(int)swCreateCommandGroupErrors.swCreateCommandGroup_Success)throw new InvalidOperationException("Kayıt komut grubu oluşturulamadı: "+menuHatasi);
+    var menuIndeksi=grup.AddCommandItem2("Kayıtları toparla",-1,"Günlükleri silmeden kayıt sonuçlarını tamamlar.","Kayıtları toparla",-1,"KayitlariToparla","KayitToparlamaEtkin",1,(int)swCommandItemType_e.swMenuItem);
+    if(menuIndeksi<0)throw new InvalidOperationException("Kayıt komutu oluşturulamadı.");
+    grup.HasToolbar=false;grup.HasMenu=true;
+    if(!grup.Activate())throw new InvalidOperationException("Kayıt menüsü etkinleştirilemedi.");
+    KayitOlayTanisi.Yaz("KurtarmaMenuHazir","grup="+KurtarmaKomutGrubu+" indeks="+menuIndeksi);
     adim="SolidWorks uygulama olaylarını bağlama";
     // Olay arayüzünü doğrudan COM nesnesine cast etmeyin; CoClass olay sağlayıcısını kullanın.
     olaylar=(SldWorks)ThisSW;olaylar.FileOpenNotify2+=BelgeAcilmayaBasladi;olaylar.DocumentLoadNotify2+=BelgeYuklendi;olaylar.FileNewNotify2+=YeniBelge;olaylar.FileOpenPostNotify+=BelgeAcildi;olaylar.OnIdleNotify+=BosZaman;
     olaylar.PromptForFilenameNotify+=DosyaAdiIstendi;olaylar.CommandOpenPreNotify+=KomutAciliyor;olaylar.CommandCloseNotify+=KomutKapandi;
     adim="Açık belgelerin olaylarını bağlama";
-    belgeTaramasi.Iste();KayitOlayTanisi.Yaz("EklentiHazir",uygulama.RevisionNumber()+" tani=33-bagimsiz-is-sirasi ornek="+ornekKimligi+"");return true;
+    belgeTaramasi.Iste();KayitOlayTanisi.Yaz("EklentiHazir",uygulama.RevisionNumber()+" tani=34-r2-komut-grubu ornek="+ornekKimligi+"");return true;
    }
    catch(Exception h){Bildir("Pronom eklentisi başlatılamadı. Adım: "+adim+". "+h.Message+" ("+h.GetType().Name+", 0x"+h.HResult.ToString("X8")+")");DisconnectFromSW();return false;}
   }
@@ -344,12 +361,24 @@ namespace Etiket.SolidWorks
    KayitOlayTanisi.Yaz("BelgeToparlamaBitti","");
   }
   void BelgeyiAyir(IntPtr id){if(belgeler.TryGetValue(id,out var b)){belgeler.Remove(id);b.Dispose();}}
+  public int KayitToparlamaEtkin()=>bagimsizYazimCalisiyor||idleIslemiCalisiyor||nativeAd?.Aktif==true||standartAd?.Aktif==true?0:1;
+  public void KayitlariToparla()
+  {
+   if(KayitToparlamaEtkin()==0)return;
+   if(kurtarmaPenceresi!=null&&!kurtarmaPenceresi.IsDisposed){kurtarmaPenceresi.Activate();return;}
+   var adres=servisAdresi;
+   kurtarmaPenceresi=new KayitKurtarmaPenceresi(new KayitKurtarmaIslemleri(gunluk,()=>new HttpAdServisi(adres)),iptalSirasi);
+   kurtarmaPenceresi.ShowDialog();kurtarmaPenceresi.Dispose();kurtarmaPenceresi=null;
+  }
   void Bildir(string mesaj)
   {
    try{uygulama?.SendMsgToUser2(mesaj,(int)swMessageBoxIcon_e.swMbWarning,(int)swMessageBoxBtn_e.swMbOk);}catch(Exception){}
   }
   public bool DisconnectFromSW()
   {
+   if(kurtarmaKomutlari!=null)try{kurtarmaKomutlari.RemoveCommandGroup2(KurtarmaKomutGrubu,true);}catch(Exception){}
+   kurtarmaKomutlari=null;
+   iptalSayaci?.Stop();iptalSayaci?.Dispose();iptalSayaci=null;iptalSirasi?.Dispose();iptalSirasi=null;
    KuyrukTanisiniDurdur();
    if(olaylar!=null){try{olaylar.FileOpenNotify2-=BelgeAcilmayaBasladi;olaylar.DocumentLoadNotify2-=BelgeYuklendi;olaylar.FileNewNotify2-=YeniBelge;olaylar.FileOpenPostNotify-=BelgeAcildi;olaylar.OnIdleNotify-=BosZaman;olaylar.PromptForFilenameNotify-=DosyaAdiIstendi;olaylar.CommandOpenPreNotify-=KomutAciliyor;olaylar.CommandCloseNotify-=KomutKapandi;}catch(Exception){}finally{olaylar=null;}}
    foreach(var b in belgeler.Values)try{b.Dispose();}catch(Exception){}

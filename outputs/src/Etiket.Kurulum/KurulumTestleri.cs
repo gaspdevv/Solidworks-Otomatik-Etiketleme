@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -83,7 +83,7 @@ namespace Pronom.Kurulum
   }
   public static int Guncelleme(string work,string eskiDll)
   {
-   var eskiHash=KurulumCekirdegi.Hash(eskiDll);Ok(eskiHash==KurulumCekirdegi.EskiDll||eskiHash==KurulumCekirdegi.PerformansDll||eskiHash==KurulumCekirdegi.DxfDll||eskiHash==KurulumCekirdegi.Kaydet25Dll||eskiHash==KurulumCekirdegi.Kaydet26Dll||eskiHash==KurulumCekirdegi.Kaydet27Dll||eskiHash==KurulumCekirdegi.Kaydet28Dll||eskiHash==KurulumCekirdegi.Kaydet29Dll||eskiHash==KurulumCekirdegi.Kaydet30Dll||eskiHash==KurulumCekirdegi.Kaydet31Dll||eskiHash==KurulumCekirdegi.Kaydet32Dll,"Gercek21/23/24/25/26/27 guncelleme fixture'i gerekir.");
+   var eskiHash=KurulumCekirdegi.Hash(eskiDll);Ok(eskiHash==KurulumCekirdegi.EskiDll||eskiHash==KurulumCekirdegi.PerformansDll||eskiHash==KurulumCekirdegi.DxfDll||eskiHash==KurulumCekirdegi.Kaydet25Dll||eskiHash==KurulumCekirdegi.Kaydet26Dll||eskiHash==KurulumCekirdegi.Kaydet27Dll||eskiHash==KurulumCekirdegi.Kaydet28Dll||eskiHash==KurulumCekirdegi.Kaydet29Dll||eskiHash==KurulumCekirdegi.Kaydet30Dll||eskiHash==KurulumCekirdegi.Kaydet31Dll||eskiHash==KurulumCekirdegi.Kaydet32Dll||eskiHash==KurulumCekirdegi.Kaydet33Dll||eskiHash==KurulumCekirdegi.Kaydet34IlkDll,"Gercek21/23/24/25/26/27 guncelleme fixture'i gerekir.");
    var root=Path.Combine(work,"guncelleme-"+Guid.NewGuid().ToString("N").Substring(0,8));Directory.CreateDirectory(root);
    var kaynak=Path.Combine(root,"paket");KurulumCekirdegi.PaketiAc(kaynak);
    var hedef=Path.Combine(root,"hedef");Directory.CreateDirectory(hedef);

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Json;
@@ -22,7 +22,7 @@ namespace Etiket.SolidWorks
   }
   public KaydetmeIslemi Oku(Guid id)
   {
-   using(var dosya=File.OpenRead(Yol(id)))
+   using(var dosya=new FileStream(Yol(id),FileMode.Open,FileAccess.Read,FileShare.Read|FileShare.Delete))
    {
     var sonuc=(KaydetmeIslemi)new DataContractJsonSerializer(typeof(KaydetmeIslemi)).ReadObject(dosya);
     if(sonuc.IslemId!=id)throw new InvalidDataException("İşlem günlüğü kimliği uyuşmuyor.");

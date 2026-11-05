@@ -1,4 +1,4 @@
-﻿-- C# istemcisi gerçek SQL testinin sonuçları. Veri silmez, sayaç değiştirmez.
+-- C# istemcisi gerçek SQL testinin sonuçları. Veri silmez, sayaç değiştirmez.
 USE [SolidWorksAutomation_ApiTest_20261008_03];
 GO
 IF (SELECT COUNT_BIG(*) FROM dbo.Documents) <> 104

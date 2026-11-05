@@ -1,4 +1,4 @@
-﻿-- Ana veritabanina dokunmadan API integration testleri icin ayri bos veritabani.
+-- Ana veritabanina dokunmadan API integration testleri icin ayri bos veritabani.
 USE [master];
 GO
 IF DB_ID(N'SolidWorksAutomation_ApiTest_20261008') IS NULL

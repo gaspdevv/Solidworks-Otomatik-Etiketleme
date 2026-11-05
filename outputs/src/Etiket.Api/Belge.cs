@@ -1,4 +1,4 @@
-﻿namespace Etiket.Api;
+namespace Etiket.Api;
 
 public sealed record Belge(long Id, string DosyaAdi, DateTime Tarih);
 public sealed record BelgeListesi(IReadOnlyList<Belge> Belgeler, int Baslangic, int Adet, long Toplam);

@@ -1,8 +1,7 @@
-﻿param([string]$SetupDosyasi)
-$ErrorActionPreference='Stop'
+﻿$ErrorActionPreference='Stop'
 $root=Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 $publish=Join-Path $root 'outputs\kurulum\SetupYayinla.ps1'
-$setup=if($SetupDosyasi){[IO.Path]::GetFullPath($SetupDosyasi)}else{Join-Path $root 'work\github-build\bin\Etiket.Kurulum\release\Pronom.Kurulum.exe'}
+$setup=Join-Path $root 'outputs\dagitim\Pronom-SolidWorks2023-DXF24-Kurulum.exe'
 $hash=(Get-FileHash -LiteralPath $setup).Hash
 $test=Join-Path $root ('work\setup-yayin-test-'+[Guid]::NewGuid().ToString('N'))
 $webs=@((Join-Path $test 'kaynak'),(Join-Path $test 'merkez'))

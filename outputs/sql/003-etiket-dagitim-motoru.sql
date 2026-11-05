@@ -1,4 +1,4 @@
-﻿-- TARİHSEL SÖZLEŞME: Yeni kurulum/geçiş için 004-dosya-adi-rezervasyon.sql kullanın.
+-- TARİHSEL SÖZLEŞME: Yeni kurulum/geçiş için 004-dosya-adi-rezervasyon.sql kullanın.
 -- Once 001 ve 002 kurulumlarini calistirin. Tekrar calistirma sayaclari sifirlamaz.
 USE [SolidWorksAutomation];
 GO

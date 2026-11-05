@@ -1,4 +1,4 @@
-﻿// Tarihsel etiket-kolonu modeli: yeni rezervasyon akışında kullanılmaz.
+// Tarihsel etiket-kolonu modeli: yeni rezervasyon akışında kullanılmaz.
 using System.Net;
 using System.Net.Http.Json;
 using Etiket.TestIstemcisi;

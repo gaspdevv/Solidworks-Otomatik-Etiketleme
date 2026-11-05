@@ -1,11 +1,11 @@
-﻿# Solidworks Co-Pilot
+# Solidworks Co-Pilot
 
 ### SolidWorks için otomatik etiketleme ve merkezi kayıt takibi
 
 **Otomatik Etiketleme**, parça ve montajlara ortak bir merkezden dosya numarası verir. SolidWorks içindeki normal kayıt akışıyla çalışır; başarılı kayıtlar web arayüzünden aranır ve takip edilir. Küçük ekiplerin aynı numarayı iki kez kullanmadan, dosya adlarını elle yönetmeden çalışması için geliştirilmiştir.
 
-**Güncel sürüm:** Kaydet33 · `2026.10.27.2`
-**Kaynak güncellemesi:** 28 Ekim 2026
+**Güncel sürüm:** Kaydet34 R2 · `2026.11.3.2`
+**Kaynak güncellemesi:** 5 Kasım 2026
 **Hedef:** Windows x64 · SolidWorks 2020–2023 · SQL Server
 
 > Otomatik Etiketleme ile yapay zekâ destekli **SolidWorks Co-Pilot** ayrı eklentilerdir. Bu depo otomatik etiketleme uygulamasının kaynaklarını ve iki paket için kullanılan web indirme arayüzünü içerir. Ayrı Co-Pilot ürününün derlenmiş DLL/EXE dosyaları burada dağıtılmaz.
@@ -23,7 +23,11 @@
 | Web arayüzü | Arama, parça/montaj filtresi, sayfalama, TSİ tarihleri ve dosya adı kopyalama. |
 | İndirmeler | Otomatik Etiketleme ve ayrı Co-Pilot paketleri için düzenli indirme sayfası. |
 
-Kaydet33, bağımsız kaydı genel belge tarama kuyruğundan ayırır. Kendi kayıt penceresi kapandıktan sonra güncel arayüz iki ayrı boşta gözleminde uygun olmalıdır; CAD yazımı tek kez yürütülür. Önceki komutlardan kalmış işaretler bu sırayı tek başına engellemez. Belirsiz işlemler körlemesine silinmez veya yeni numarayla tekrarlanmaz.
+Kaydet34 R2, kayıt iptalini önce bilgisayardaki kalıcı günlüğe yazar; merkezi iptal yanıtı kayıt penceresini bekletmez. Arka plan gönderimi aynı işlem kimliğini kullanır. Bağlantı geldiğinde güvenli iptaller tamamlanır.
+
+**Araçlar → Otomatik Etiketleme → Kayıtları toparla** menüsünden bekleyen işlemler görülebilir. Dosya kanıtı doğrulanabilen sonuçlar aynı işlem kimliğiyle tamamlanır; CAD yeniden yazılmaz ve yeni numara ayrılmaz. Belirsiz yazımlar veya kanıtı değişmiş dosyalar otomatik silinmez. Bu araç tüm bekleyen işlemleri sıfırlayan bir düğme değildir.
+
+Kaydet33'te eklenen bağımsız kayıt kuyruğu korunur. Kendi kayıt penceresi kapandıktan sonra uygun boşta durumda CAD yazımı tek kez yürütülür.
 
 ## Mimari
 
@@ -101,11 +105,14 @@ Bu başlatma veritabanı oluşturmaz veya sıfırlamaz. Yerel web adresi `http:/
 
 ## Doğrulama ve sınırlar
 
-- Kaydet33 kaynakları 2020 ve 2023 API referanslarıyla daha önce ayrı ayrı derlendi; 921 çekirdek kontrol geçti.
-- SolidWorks 2020 SP4 ve 2023 SP0.1 ana kayıt grupları önceki sürümlerde doğrulandı. Masaüstüne kayıt ve dış format kontrolleri iki sürümde kullanıcı kabulünden geçti.
-- Kaydet33 Dell / SolidWorks 2023 üzerinde üç bağımsız kayıt, iptal-sonrası tekrar, tek web kaydı, montajı kapatıp açma ve normal Kaydet kontrollerini geçti.
-- Kullanıcı Kaydet33'ü daha önce sorun yaşanan bilgisayara da kurdu; Bağımsız Yap testlerinde sorun bildirmedi. Normal kayıt ve bağımsız kayıt süreleri yaklaşık aynı, bir saniyenin biraz üzerindeydi.
-- Her servis paketi, dosya biçimi ve ağ ortamı fiziksel olarak ayrı ayrı sınanmış değildir. Kaydet33 için yeni bir gerçek 2020 kabul turu bu yayında yapılmadı. Önceki bileşen yükleme donmasının nedeni kesinleştirilmiş değildir.
+- Kaydet34 R2, 2020 ve 2023 API referanslarıyla ayrı ayrı hatasız derlendi; her iki çalıştırmada 951 çekirdek kontrol geçti.
+- Çevrimdışı iptal, yanıt kaybı, yeniden başlatma ve aynı işlem kimliğiyle güvenli tekrar kontrollü testlerde doğrulandı.
+- 80 dışa aktarım penceresi ve 16 kayıt girdisi kontrolü geçti. Bunlar kendi Windows test pencerelerinde çalışır; gerçek CAD kabulünün yerine geçmez.
+- Kurulum çekirdeği, eski sürümlerden güncelleme ve DPI/arayüz kontrolleri geçti.
+- 4 Kasım 2026'da Dell / SolidWorks 2023 SP0.1 üzerinde toparlama menüsü, belirsiz günlükleri koruma, iptal-sonrası tekrar, geometrili parça ve montajın Farklı Kaydet işlemleri, Bağımsız Yap, montajı kapatıp açma, Ctrl+S ve tek merkezi kayıt kontrolleri geçti.
+- Aynı gün SolidWorks 2020 SP4.0 üzerinde toparlama menüsü, iptal-sonrası tekrar, geometrili parça kaydı ve Ctrl+S kontrolleri geçti. 2020'de Bağımsız Yap ve dışa aktarım bu son turda yeniden sınanmadı.
+- Kaydet34 R2 web indirme paketi 4 Kasım'da yayımlandı ve indirilen ZIP'in içindeki EXE hash'i doğrulandı.
+- Her servis paketi ve ağ ortamı fiziksel olarak sınanmış değildir. Sorunlu istemcinin ağında Kaydet34 R2 kabulü henüz yapılmadı; ağ kök nedeninin giderildiği iddia edilmez.
 
 ## Depo düzeni
 

@@ -1,4 +1,4 @@
-﻿-- 03 testinden SONRA, 003 motor kurulumunu test veritabaninda tekrar calistirin.
+-- 03 testinden SONRA, 003 motor kurulumunu test veritabaninda tekrar calistirin.
 -- 003 icindeki USE satiri test veritabanini gostermeli.
 USE [SolidWorksAutomation_EtiketTest_20261008];
 GO

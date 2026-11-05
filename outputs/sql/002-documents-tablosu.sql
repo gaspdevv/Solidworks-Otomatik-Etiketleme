@@ -1,4 +1,4 @@
-﻿-- TARİHSEL SÖZLEŞME: Yeni kurulum/geçiş için 004-dosya-adi-rezervasyon.sql kullanın.
+-- TARİHSEL SÖZLEŞME: Yeni kurulum/geçiş için 004-dosya-adi-rezervasyon.sql kullanın.
 -- SSMS'de hedef SQL Server baglantisinda calistirin.
 -- Var olan tabloyu silmez veya degistirmez. Ornek kayit eklemez.
 USE [SolidWorksAutomation];

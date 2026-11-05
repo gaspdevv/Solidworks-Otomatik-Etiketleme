@@ -1,4 +1,4 @@
-﻿using System.Net.Http.Json;
+using System.Net.Http.Json;
 using System.Text.Json;
 namespace Etiket.TestIstemcisi;
 public sealed record BelgeKaydi(long Id,string DosyaAdi,DateTime Tarih);

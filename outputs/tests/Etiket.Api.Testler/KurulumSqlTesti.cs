@@ -1,4 +1,4 @@
-﻿using Microsoft.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 namespace Etiket.Api.Testler;
 
 internal static class KurulumSqlTesti

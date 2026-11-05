@@ -1,4 +1,4 @@
-﻿USE [SolidWorksAutomation_EtiketTest_20261008];
+USE [SolidWorksAutomation_EtiketTest_20261008];
 GO
 SET NOCOUNT ON;
 IF (SELECT COUNT(*) FROM dbo.TestCalismalari WHERE Bitis IS NOT NULL) <> 2

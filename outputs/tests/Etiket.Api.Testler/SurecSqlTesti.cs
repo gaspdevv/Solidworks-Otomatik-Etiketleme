@@ -1,4 +1,4 @@
-﻿// Tarihsel etiket-kolonu modeli: yeni rezervasyon akışında kullanılmaz.
+// Tarihsel etiket-kolonu modeli: yeni rezervasyon akışında kullanılmaz.
 using System.Diagnostics;
 using System.Globalization;
 using System.Net;

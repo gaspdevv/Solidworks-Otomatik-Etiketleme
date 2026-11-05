@@ -1,5 +1,5 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
- <PropertyGroup><TargetFramework>net48</TargetFramework><LangVersion>latest</LangVersion><PlatformTarget>x64</PlatformTarget><ImplicitUsings>disable</ImplicitUsings><Nullable>disable</Nullable><GenerateAssemblyInfo>true</GenerateAssemblyInfo><Version>2026.10.27.2</Version><AssemblyName>Pronom.SolidWorks</AssemblyName><AutomaticallyUseReferenceAssemblyPackages>false</AutomaticallyUseReferenceAssemblyPackages><SolidWorksApiKlasoru Condition="'$(SolidWorksApiKlasoru)'==''">$(MSBuildThisFileDirectory)..\..\..\work\SolidWorks2020SP04</SolidWorksApiKlasoru></PropertyGroup>
+<Project Sdk="Microsoft.NET.Sdk">
+ <PropertyGroup><TargetFramework>net48</TargetFramework><LangVersion>latest</LangVersion><PlatformTarget>x64</PlatformTarget><ImplicitUsings>disable</ImplicitUsings><Nullable>disable</Nullable><GenerateAssemblyInfo>true</GenerateAssemblyInfo><Version>2026.11.3.2</Version><AssemblyName>Pronom.SolidWorks</AssemblyName><AutomaticallyUseReferenceAssemblyPackages>false</AutomaticallyUseReferenceAssemblyPackages><SolidWorksApiKlasoru Condition="'$(SolidWorksApiKlasoru)'==''">$(MSBuildThisFileDirectory)..\..\..\work\SolidWorks2020SP04</SolidWorksApiKlasoru></PropertyGroup>
  <ItemGroup>
   <Compile Remove="KaydetmeKarari.cs" />
   <!-- Klasör okuma deneyleri kararlı test DLL içine alınmaz. -->

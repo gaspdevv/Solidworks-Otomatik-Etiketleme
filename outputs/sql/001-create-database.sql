@@ -1,4 +1,4 @@
-﻿-- Run in SSMS against the intended SQL Server instance.
+-- Run in SSMS against the intended SQL Server instance.
 -- Re-running this script preserves an existing database.
 USE [master];
 GO

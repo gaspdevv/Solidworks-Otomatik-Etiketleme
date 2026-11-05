@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 namespace Etiket.SolidWorks
 {
@@ -15,8 +15,8 @@ namespace Etiket.SolidWorks
  public sealed class NativeAdDenemeIslemi
  {
   readonly KaydetmeIslemYoneticisi yonetici;
-  KaydetmeIslemi bekleyen;
-  public NativeAdDenemeIslemi(KaydetmeIslemYoneticisi yonetici){this.yonetici=yonetici;}
+  KaydetmeIslemi bekleyen;readonly Action<KaydetmeIslemi> iptal;
+  public NativeAdDenemeIslemi(KaydetmeIslemYoneticisi yonetici,Action<KaydetmeIslemi> iptal=null){this.yonetici=yonetici;this.iptal=iptal??yonetici.IptalEt;}
   public bool Aktif=>bekleyen!=null;
   public Guid IslemId=>bekleyen?.IslemId??Guid.Empty;
   public bool KaydaDevredildi {get;private set;}
@@ -40,7 +40,7 @@ namespace Etiket.SolidWorks
    KaydaDevredildi=true;return bekleyen;
   }
   public void KayitSonucunuAl()
-  {if(bekleyen!=null&&(bekleyen.Asama=="Onaylandi"||bekleyen.Asama=="Iptal")){bekleyen=null;KaydaDevredildi=false;}}
+  {if(bekleyen==null)return;var son=yonetici.SonDurumuOku(bekleyen.IslemId);if(son.Asama=="Onaylandi"||son.Asama=="Iptal"){bekleyen=null;KaydaDevredildi=false;}}
   public void PencereIptaliniTamamla(bool iptalIstendi)
   {
    if(iptalIstendi&&!KaydaDevredildi)IptalEt();
@@ -49,7 +49,7 @@ namespace Etiket.SolidWorks
   {
    if(KaydaDevredildi)return; // Pencerenin programatik kapanışı, kayıt iptali değildir.
    if(bekleyen==null)return;
-   yonetici.IptalEt(bekleyen);bekleyen=null;
+   iptal(bekleyen);bekleyen=null;
   }
  }
 }

@@ -1,4 +1,4 @@
-﻿-- 005: iptali doğrulanmış otomatik adları yeniden dağıt. API kapalıyken hedef DB'de çalıştır.
+-- 005: iptali doğrulanmış otomatik adları yeniden dağıt. API kapalıyken hedef DB'de çalıştır.
 -- Kayıt/ID/sayaç sıfırlamaz; iptal GUID geçmişini korur. 004'ten sonra uygulanır.
 SET ANSI_NULLS ON; SET QUOTED_IDENTIFIER ON; SET ANSI_PADDING ON; SET ANSI_WARNINGS ON;
 SET CONCAT_NULL_YIELDS_NULL ON; SET ARITHABORT ON; SET NUMERIC_ROUNDABORT OFF; SET XACT_ABORT ON;

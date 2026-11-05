@@ -1,4 +1,4 @@
-﻿SOLIDWORKS CO-PILOT - ILK KURULUM VE GUNCELLEME
+SOLIDWORKS CO-PILOT - ILK KURULUM VE GUNCELLEME
 Guncel eklenti: Numarasiz 1 + Urun Karti 4 (27 Ekim 2026)
 Kurulum paketi: 28 Ekim 2026 / R2
 

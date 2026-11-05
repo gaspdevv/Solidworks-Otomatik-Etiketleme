@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -17,7 +17,7 @@ partial class Program
   try
   {
    if(args.Length==1&&args[0]=="--performans")return PerformansOlc();
-   if(args.Length==0){Kaydet33Kurallari();DisAktarimTestleri();Kaydet31Kurallari();Kaydet29Kurallari();Kaydet28Kurallari();Kaydet27Kurallari();Kaydet25Kurallari();DxfAktarimTestleri();PerformansDogrulamaTestleri();ToparlanmaTestleri();KayitOncesiBaglamaTestleri();}
+   if(args.Length==0){Kaydet34Kurallari();Kaydet33Kurallari();DisAktarimTestleri();Kaydet31Kurallari();Kaydet29Kurallari();Kaydet28Kurallari();Kaydet27Kurallari();Kaydet25Kurallari();DxfAktarimTestleri();PerformansDogrulamaTestleri();ToparlanmaTestleri();KayitOncesiBaglamaTestleri();}
    if(args.Length==1&&args[0]=="--native-girdi"){NativeKaydetGirdiTestleri.Calistir();return 0;}
    if(args.Length==1&&args[0]=="--native-aktarim"){NativeDisAktarimTestleri();return 0;}
    if(args.Length==1&&args[0]=="--native-ad"){NativeDosyaAdiTestleri.Calistir();return 0;}

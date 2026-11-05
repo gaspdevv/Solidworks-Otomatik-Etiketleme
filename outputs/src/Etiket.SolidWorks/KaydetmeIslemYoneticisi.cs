@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 namespace Etiket.SolidWorks
 {
@@ -99,6 +99,18 @@ namespace Etiket.SolidWorks
    KayitOlayTanisi.Yaz("KayitKanitiSaklandi","islem="+islem.IslemId+" asama="+islem.Asama+" boyut="+islem.KayitBoyutu+" sha256="+islem.KayitSHA256);
    if(!DosyaAdiKurali.AyniYol(islem.HedefDosya,gercekYol)||!File.Exists(gercekYol))throw new IOException("Kaydedilen hedef dogrulanamadi; merkezi onay gonderilmedi.");
    OnayIsteginiGonder(islem); // Kaydedildi+kanit zaten kalici; ayni asama ikinci kez yazilmaz.
+  }
+  public KaydetmeIslemi SonDurumuOku(Guid id)=>gunluk.Oku(id);
+  public void IptaliYereldeBeklet(KaydetmeIslemi islem)
+  {
+   var kalici=gunluk.Oku(islem.IslemId);
+   if(kalici.Asama=="Iptal")return;
+   if((kalici.Asama!="AdBekleniyor"&&kalici.Asama!="Ayrildi"&&kalici.Asama!="IptalBekliyor")
+    ||(islem.Asama!="AdBekleniyor"&&islem.Asama!="Ayrildi"&&islem.Asama!="IptalBekliyor")
+    ||KayitDosyaKaniti.Var(kalici)||!string.IsNullOrEmpty(kalici.GercekDosya))
+    throw new InvalidOperationException("Yazımı başlamış veya belirsiz işlem pencere iptaliyle serbest bırakılamaz.");
+   kalici.Asama="IptalBekliyor";gunluk.Yaz(kalici);islem.Asama=kalici.Asama;
+   KayitOlayTanisi.Yaz("YerelIptalKuyrukta","islem="+islem.IslemId);
   }
   public void IptalEt(KaydetmeIslemi islem)
   {

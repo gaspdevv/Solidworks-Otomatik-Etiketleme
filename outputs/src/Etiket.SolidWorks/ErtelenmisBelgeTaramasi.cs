@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 namespace Etiket.SolidWorks
 {
  public sealed class ErtelenmisBelgeTaramasi

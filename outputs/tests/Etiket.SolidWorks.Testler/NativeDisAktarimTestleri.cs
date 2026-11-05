@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -47,7 +48,9 @@ partial class Program
      if(hata!=null)throw hata;
      Kontrol(sonuc==DialogResult.OK,"Gercek Windows dis format kayit penceresi native devam etmeli.");
      Kontrol(Path.GetFileName(d.FileName)==tur+"00128."+ext,"Gorunen ad ve Shell ic hedefi kaynagin ayni numarasini tasimali: "+d.FileName);
-     Kontrol(servis.IptalCagrisi==1&&servis.OnayCagrisi==0,"Native export yalniz kullanilmayan rezervasyonu iptal etmeli.");
+     Kontrol(servis.IptalCagrisi==0&&servis.OnayCagrisi==0&&gunluk.BekleyenleriOku().Single().Asama=="IptalBekliyor","Native export iptali agi beklemeden kalici siraya alinmali.");
+     using(var isci=new IptalGonderimSirasi(gunluk,()=>servis))isci.Baslat().GetAwaiter().GetResult();
+     Kontrol(servis.IptalCagrisi==1&&!gunluk.BekleyenleriOku().Any(),"Export iptali arka planda ayni kimlikle bir kez tamamlanmali.");
      Kontrol(Directory.GetFiles(alan).Length==1&&File.ReadAllText(kaynak)=="Test verisi; CAD degil.","Pencere testi hicbir export/CAD dosyasi yazmamali; kaynak korunmali.");
     }
    }finally{((IDisposable)nesne).Dispose();}

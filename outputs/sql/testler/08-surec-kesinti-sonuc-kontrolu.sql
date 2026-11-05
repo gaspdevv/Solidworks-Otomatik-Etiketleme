@@ -1,4 +1,4 @@
-﻿-- Salt okunur denetim: 21 kontrolle tamamlanan süreç/kesinti testi.
+-- Salt okunur denetim: 21 kontrolle tamamlanan süreç/kesinti testi.
 USE [SolidWorksAutomation_ApiTest_20261008_04];
 GO
 IF (SELECT COUNT_BIG(*) FROM dbo.Documents) <> 6

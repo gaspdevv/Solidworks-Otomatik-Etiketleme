@@ -1,4 +1,4 @@
-﻿-- Yalnizca bos ve ayri test veritabaninda, 002 ve 003 kurulduktan sonra.
+-- Yalnizca bos ve ayri test veritabaninda, 002 ve 003 kurulduktan sonra.
 USE [SolidWorksAutomation_EtiketTest_20261008];
 GO
 SET NOCOUNT ON;

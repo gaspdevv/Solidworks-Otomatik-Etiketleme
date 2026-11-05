@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -63,7 +63,7 @@ namespace Etiket.SolidWorks
   public bool IptalEslesiyor(string kaynak)=>KaynakEslesiyor(kaynak)
    ||(!string.IsNullOrEmpty(otomatikAd)&&string.Equals(Path.GetFileNameWithoutExtension(kaynak??""),otomatikAd,StringComparison.OrdinalIgnoreCase));
   public NativeAdDenemePenceresi(KaydetmeIslemYoneticisi yonetici)
-  {islem=new NativeAdDenemeIslemi(yonetici);hookIsleyici=Hook;altIsleyici=AltPencere;}
+  {islem=new NativeAdDenemeIslemi(yonetici,i=>yonetici.IptaliYereldeBeklet(i));hookIsleyici=Hook;altIsleyici=AltPencere;}
   public void Hazirla(string tur,string kaynak,Action<KaydetmeIslemi,string> kayit=null,Action<string> bildir=null,bool standartKayit=false)
   {
    try
@@ -195,7 +195,7 @@ namespace Etiket.SolidWorks
   public void IptalEt()
   {
    if(islem.KaydaDevredildi){KayitOlayTanisi.Yaz("NativeKayitPencereKapandi","Kayıt sırada; rezervasyon iptal edilmedi.");Dispose();return;}
-   try{islem.IptalEt();KayitOlayTanisi.Yaz("NativeAdIptal","Deneme rezervasyonu iptal edildi; numara 005 kurulumu ile tekrar kullanılabilir.");}
+   try{islem.IptalEt();KayitOlayTanisi.Yaz("NativeAdIptal","İptal isteği yerelde korundu; merkezi sonuç arka planda tamamlanacak.");}
    finally{Dispose();otomatikAd="";}
   }
   void KayitDogrulamaSayaciniBaslat()

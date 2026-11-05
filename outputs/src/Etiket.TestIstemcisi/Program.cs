@@ -1,4 +1,4 @@
-﻿using Etiket.TestIstemcisi;
+using Etiket.TestIstemcisi;
 Console.OutputEncoding=System.Text.Encoding.UTF8;
 try
 {
