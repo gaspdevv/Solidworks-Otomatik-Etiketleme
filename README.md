@@ -1,4 +1,4 @@
-# Solidworks Co-Pilot
+# Solidworks Otomatik Parça ve Montaj Etiketleme
 
 ### SolidWorks için otomatik etiketleme ve merkezi kayıt takibi
 
