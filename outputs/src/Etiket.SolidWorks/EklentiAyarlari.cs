@@ -4,10 +4,10 @@ namespace Etiket.SolidWorks
 {
  public static class SolidWorksSurumKurali
  {
-  // 2020–2023 = API major 28–31. SP/hotfix kısmı yıl kontrolünden ayrı tutulur.
+  // 2020–2023 = API 28–31, 2027 = API 35. SP/hotfix kısmı yıl kontrolünden ayrı tutulur.
   // Bu kontrol hedef yılı doğrular; gerçek CAD davranışının testinin yerini almaz.
   public static bool TestHedefiMi(string revizyon)
-   =>Version.TryParse(revizyon,out var surum)&&surum.Major>=28&&surum.Major<=31;
+   =>Version.TryParse(revizyon,out var surum)&&(surum.Major is >=28 and <=31 or 35);
  }
  internal static class EklentiAyarlari
  {

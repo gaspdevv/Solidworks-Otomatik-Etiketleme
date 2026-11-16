@@ -20,9 +20,9 @@ namespace Pronom.Kurulum
    var bakilan=new List<int>();
    var sadece2020=KurulumCekirdegi.SolidWorksKurulumYillari(y=>{bakilan.Add(y);return y==2020?@"C:\SW2020":null;},p=>p==@"C:\SW2020\SLDWORKS.exe");
    Ok(sadece2020.SequenceEqual(new[]{2020}),"Yalniz 2020 kurulu bilgisayar kabul edilmeli.");
-   Ok(bakilan.SequenceEqual(new[]{2020,2021,2022,2023}),"Yalniz desteklenen yil anahtarlari okunmali.");
-   Ok(KurulumCekirdegi.SolidWorksKurulumYillari(y=>@"C:\SW"+y,p=>p==@"C:\SW2020\SLDWORKS.exe"||p==@"C:\SW2023\SLDWORKS.exe").SequenceEqual(new[]{2020,2023}),"Yan yana 2020 ve 2023 kurulumlari bulunmali.");
-   foreach(var yil in new[]{2021,2022,2023})Ok(KurulumCekirdegi.SolidWorksKurulumYillari(y=>y==yil?@"C:\SW":null,p=>true).SequenceEqual(new[]{yil}),"Her desteklenen yil tek basina kurulabilmeli.");
+   Ok(bakilan.SequenceEqual(new[]{2020,2021,2022,2023,2027}),"Yalniz desteklenen yil anahtarlari okunmali.");
+   Ok(KurulumCekirdegi.SolidWorksKurulumYillari(y=>@"C:\SW"+y,p=>p==@"C:\SW2020\SLDWORKS.exe"||p==@"C:\SW2023\SLDWORKS.exe"||p==@"C:\SW2027\SLDWORKS.exe").SequenceEqual(new[]{2020,2023,2027}),"Yan yana 2020, 2023 ve 2027 kurulumlari bulunmali.");
+   foreach(var yil in new[]{2021,2022,2023,2027})Ok(KurulumCekirdegi.SolidWorksKurulumYillari(y=>y==yil?@"C:\SW":null,p=>true).SequenceEqual(new[]{yil}),"Her desteklenen yil tek basina kurulabilmeli.");
    Ok(KurulumCekirdegi.SolidWorksKurulumYillari(y=>@"C:\Silinmis",p=>false).Length==0,"Eski registry anahtari tek basina kurulum sayilmamali.");
    Ok(KurulumCekirdegi.SolidWorksKurulumYillari(y=>y==2024?@"C:\SW2024":null,p=>true).Length==0,"Sadece 2024 olan bilgisayar kabul edilmemeli.");
    Ok(KurulumCekirdegi.SolidWorksKurulumYillari(y=>"  ",p=>{throw new Exception("Bos yol sorgulanmamali");}).Length==0,"Bos registry degeri dosya sorgusu yapmamali.");
@@ -83,7 +83,7 @@ namespace Pronom.Kurulum
   }
   public static int Guncelleme(string work,string eskiDll)
   {
-   var eskiHash=KurulumCekirdegi.Hash(eskiDll);Ok(eskiHash==KurulumCekirdegi.EskiDll||eskiHash==KurulumCekirdegi.PerformansDll||eskiHash==KurulumCekirdegi.DxfDll||eskiHash==KurulumCekirdegi.Kaydet25Dll||eskiHash==KurulumCekirdegi.Kaydet26Dll||eskiHash==KurulumCekirdegi.Kaydet27Dll||eskiHash==KurulumCekirdegi.Kaydet28Dll||eskiHash==KurulumCekirdegi.Kaydet29Dll||eskiHash==KurulumCekirdegi.Kaydet30Dll||eskiHash==KurulumCekirdegi.Kaydet31Dll||eskiHash==KurulumCekirdegi.Kaydet32Dll||eskiHash==KurulumCekirdegi.Kaydet33Dll||eskiHash==KurulumCekirdegi.Kaydet34IlkDll,"Gercek21/23/24/25/26/27 guncelleme fixture'i gerekir.");
+   var eskiHash=KurulumCekirdegi.Hash(eskiDll);Ok(KurulumCekirdegi.BilinenDllMi(eskiHash)&&eskiHash!=KurulumCekirdegi.YeniDll,"Taninan eski eklenti DLL dosyasi gerekir.");
    var root=Path.Combine(work,"guncelleme-"+Guid.NewGuid().ToString("N").Substring(0,8));Directory.CreateDirectory(root);
    var kaynak=Path.Combine(root,"paket");KurulumCekirdegi.PaketiAc(kaynak);
    var hedef=Path.Combine(root,"hedef");Directory.CreateDirectory(hedef);

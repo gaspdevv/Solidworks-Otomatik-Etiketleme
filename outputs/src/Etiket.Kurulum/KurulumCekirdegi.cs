@@ -34,12 +34,13 @@ namespace Pronom.Kurulum
   public const string Kaydet32Dll="F2D3145A828003F7D40B569D5C253415760DB3223A25C74157623CE57818DC51";
   public const string Kaydet33Dll="FEE4AFDD9BAC14D41795103AE4338B61434C7839B4590089D9F2E34564FCE8A7";
   public const string Kaydet34IlkDll="73FCC77105F23FE5C13FCCCE22EBF98620A14624D56EC3C9E255D5BC0F5A54AE";
-  public const string YeniDll="D1EF0F5AB54CC773F1E3B2D0F4F99C313DB7045508B817DF42AE91297D4DC749";
-  public static bool BilinenDllMi(string hash)=>hash==EskiDll||hash==PerformansDll||hash==DxfDll||hash==Kaydet25Dll||hash==Kaydet26Dll||hash==Kaydet27Dll||hash==Kaydet28Dll||hash==Kaydet29Dll||hash==Kaydet30Dll||hash==Kaydet31Dll||hash==Kaydet32Dll||hash==Kaydet33Dll||hash==Kaydet34IlkDll||hash==YeniDll;
+  public const string Kaydet34R2Dll="D1EF0F5AB54CC773F1E3B2D0F4F99C313DB7045508B817DF42AE91297D4DC749";
+  public const string YeniDll="6A7CE5D23F3E59A9E92630B6E5AE2703BA5B5F4F94752CC30214F86EBBD6AB03";
+  public static bool BilinenDllMi(string hash)=>hash==EskiDll||hash==PerformansDll||hash==DxfDll||hash==Kaydet25Dll||hash==Kaydet26Dll||hash==Kaydet27Dll||hash==Kaydet28Dll||hash==Kaydet29Dll||hash==Kaydet30Dll||hash==Kaydet31Dll||hash==Kaydet32Dll||hash==Kaydet33Dll||hash==Kaydet34IlkDll||hash==Kaydet34R2Dll||hash==YeniDll;
   public static int[] SolidWorksKurulumYillari(Func<int,string> klasorOku,Func<string,bool> dosyaVar)
   {
    if(klasorOku==null||dosyaVar==null)throw new ArgumentNullException();
-   return Enumerable.Range(2020,4).Where(yil=>
+   return new[]{2020,2021,2022,2023,2027}.Where(yil=>
    {
     var klasor=klasorOku(yil);
     return !string.IsNullOrWhiteSpace(klasor)&&dosyaVar(Path.Combine(klasor,"SLDWORKS.exe"));
@@ -50,7 +51,7 @@ namespace Pronom.Kurulum
    if(kayitHash!=null&&!BilinenDllMi(kayitHash))throw new IOException("Mevcut eklenti sürümü tanınmıyor; dosyalar değiştirilmedi.");
    if(kayitHash==null&&!hedefVar)return new KurulumBilgisi{Dugme="Kur",Baslik="Eklentiyi kullanıma hazır hale getirin",Aciklama="İlk kurulum yapılacak."};
    if(hazir)return new KurulumBilgisi{Dugme="Kontrol et",Baslik="Pronom güncel",Aciklama="Güncel sürüm kurulu. Bağlantı ayarlarını düzenleyebilirsiniz."};
-   if(kayitHash==EskiDll||kayitHash==PerformansDll||kayitHash==DxfDll||kayitHash==Kaydet25Dll||kayitHash==Kaydet26Dll||kayitHash==Kaydet27Dll||kayitHash==Kaydet28Dll||kayitHash==Kaydet29Dll||kayitHash==Kaydet30Dll||kayitHash==Kaydet31Dll||kayitHash==Kaydet32Dll||kayitHash==Kaydet33Dll||kayitHash==Kaydet34IlkDll||kayitHash==YeniDll&&paketSaglam)return new KurulumBilgisi{Dugme="Güncelle",Baslik="Pronom'u güncelleyin",Aciklama=kayitHash!=YeniDll?"SolidWorks 2020–2023 için güncel kayıt düzeltmeleri kurulacak.":"Eklenti güncel. Kurulum ve bağlantı araçları güncellenecek."};
+   if(BilinenDllMi(kayitHash)&&(kayitHash!=YeniDll||paketSaglam))return new KurulumBilgisi{Dugme="Güncelle",Baslik="Pronom'u güncelleyin",Aciklama=kayitHash!=YeniDll?"SolidWorks 2020–2023 ve 2027 için güncel eklenti kurulacak.":"Eklenti güncel. Kurulum ve bağlantı araçları güncellenecek."};
    return new KurulumBilgisi{Dugme="Onar",Baslik="Pronom kurulumunu tamamlayın",Aciklama="Eksik dosyalar veya eklenti kaydı onarılacak."};
   }
   public static string Hash(string yol){using(var s=File.OpenRead(yol))using(var h=SHA256.Create())return BitConverter.ToString(h.ComputeHash(s)).Replace("-","");}
@@ -101,7 +102,7 @@ namespace Pronom.Kurulum
     }
    }
    if(adlar.Count!=liste.Length)throw new IOException("Paket dosyaları eksik.");
-   if(Hash(AltYol(hedef,"Pronom.SolidWorks.dll"))!=YeniDll)throw new IOException("Kaydet34 DLL doğrulanamadı.");
+   if(Hash(AltYol(hedef,"Pronom.SolidWorks.dll"))!=YeniDll)throw new IOException("Eklenti DLL dosyası doğrulanamadı.");
   }
   public static void MakineDosyalari(string kaynak,string hedef,Action<string> kaydet,Action<string> geriKaydet,Action kapaliMi,Action<string,string> kopyala=null)
   {

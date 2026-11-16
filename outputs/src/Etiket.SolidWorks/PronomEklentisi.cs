@@ -45,7 +45,7 @@ namespace Etiket.SolidWorks
     uygulama=(ISldWorks)ThisSW;
     adim="SolidWorks sürüm kontrolü";
     var revizyon=uygulama.RevisionNumber();
-    if(!SolidWorksSurumKurali.TestHedefiMi(revizyon))throw new InvalidOperationException("Bu paket SolidWorks 2020–2023 içindir. Okunan API revizyonu: "+revizyon);
+    if(!SolidWorksSurumKurali.TestHedefiMi(revizyon))throw new InvalidOperationException("Bu paket SolidWorks 2020–2023 veya 2027 içindir. Okunan API revizyonu: "+revizyon);
     KayitOlayTanisi.Yaz("SurumKontrolu",revizyon);
     adim="Kullanıcı ayarı ve işlem günlüğü";
     servisAdresi=EklentiAyarlari.ApiAdresi();servis=new HttpAdServisi(servisAdresi);
@@ -76,7 +76,7 @@ namespace Etiket.SolidWorks
     olaylar=(SldWorks)ThisSW;olaylar.FileOpenNotify2+=BelgeAcilmayaBasladi;olaylar.DocumentLoadNotify2+=BelgeYuklendi;olaylar.FileNewNotify2+=YeniBelge;olaylar.FileOpenPostNotify+=BelgeAcildi;olaylar.OnIdleNotify+=BosZaman;
     olaylar.PromptForFilenameNotify+=DosyaAdiIstendi;olaylar.CommandOpenPreNotify+=KomutAciliyor;olaylar.CommandCloseNotify+=KomutKapandi;
     adim="Açık belgelerin olaylarını bağlama";
-    belgeTaramasi.Iste();KayitOlayTanisi.Yaz("EklentiHazir",uygulama.RevisionNumber()+" tani=34-r2-komut-grubu ornek="+ornekKimligi+"");return true;
+    belgeTaramasi.Iste();KayitOlayTanisi.Yaz("EklentiHazir",revizyon+" tani=35-solidworks-2027 ornek="+ornekKimligi+"");return true;
    }
    catch(Exception h){Bildir("Pronom eklentisi başlatılamadı. Adım: "+adim+". "+h.Message+" ("+h.GetType().Name+", 0x"+h.HResult.ToString("X8")+")");DisconnectFromSW();return false;}
   }

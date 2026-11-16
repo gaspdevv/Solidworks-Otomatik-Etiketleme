@@ -2,7 +2,7 @@
 $ErrorActionPreference='Stop'
 $root=Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 $src=Join-Path $root 'outputs\src\Etiket.Kurulum'
-$build=Join-Path $root 'work\kaydet34-build'
+$build=Join-Path $root 'work\kaydet35-build'
 $payload=Join-Path $root ('work\setup-payload-'+[Guid]::NewGuid().ToString('N'))
 $null=New-Item -ItemType Directory -Path (Join-Path $payload 'Araclar') -Force
 foreach($name in @('Pronom.SolidWorks.dll','SolidWorks.Interop.sldworks.dll','SolidWorks.Interop.swconst.dll','SolidWorks.Interop.swpublished.dll')){
@@ -35,10 +35,10 @@ $oldHome=$env:DOTNET_CLI_HOME;$oldPackages=$env:NUGET_PACKAGES
 try{
  $env:DOTNET_CLI_HOME=Join-Path $root 'work\dotnet-home'
  if($NugetPaketKlasoru){$env:NUGET_PACKAGES=$NugetPaketKlasoru}
- & dotnet build (Join-Path $src 'Etiket.Kurulum.csproj') -c Release --artifacts-path (Join-Path $root 'work\setup34-build') -m:1 -nr:false -p:UseSharedCompilation=false
+ & dotnet build (Join-Path $src 'Etiket.Kurulum.csproj') -c Release --artifacts-path (Join-Path $root 'work\setup35-build') -m:1 -nr:false -p:UseSharedCompilation=false
  if($LASTEXITCODE -ne 0){throw 'Setup derlenemedi.'}
 }finally{$env:DOTNET_CLI_HOME=$oldHome;$env:NUGET_PACKAGES=$oldPackages}
-$exe=Join-Path $root 'work\setup34-build\bin\Etiket.Kurulum\release\Pronom.Kurulum.exe'
+$exe=Join-Path $root 'work\setup35-build\bin\Etiket.Kurulum\release\Pronom.Kurulum.exe'
 if(!(Test-Path -LiteralPath $exe)){throw ('Derleme bitti ancak kurulum EXE dosyası bulunamadı: '+$exe+'. Güvenlik geçmişini kontrol edin; dağıtım oluşturulmadı.')}
 $process=Start-Process -FilePath $exe -ArgumentList @('--kendi-testleri',('"'+(Join-Path $root 'work')+'"')) -WindowStyle Hidden -Wait -PassThru
 if($process.ExitCode -ne 0){throw 'Setup çekirdeği kontrolleri geçmedi; dağıtım oluşturulmadı.'}
@@ -78,12 +78,20 @@ if($process.ExitCode -ne 0){throw 'Surum32den guncelleme kontrolleri gecmedi; da
 $kaydet33DllTestYolu=Join-Path $root 'work\kaydet33-build\bin\Etiket.SolidWorks\release\Pronom.SolidWorks.dll'
 $process=Start-Process -FilePath $exe -ArgumentList @('--guncelleme-testleri',('"'+(Join-Path $root 'work')+'"'),('"'+$kaydet33DllTestYolu+'"')) -WindowStyle Hidden -Wait -PassThru
 if($process.ExitCode -ne 0){throw 'Surum33 guncelleme kontrolleri gecmedi.'}
-$kaydet34IlkDllTestYolu=Join-Path $root 'work\setup-test-verisi\34-ilk\Pronom.SolidWorks.dll'
-$process=Start-Process -FilePath $exe -ArgumentList @('--guncelleme-testleri',('"'+(Join-Path $root 'work')+'"'),('"'+$kaydet34IlkDllTestYolu+'"')) -WindowStyle Hidden -Wait -PassThru
-if($process.ExitCode -ne 0){throw 'Kaydet34 ilk surumden R2 guncelleme kontrolleri gecmedi.'}
-$process=Start-Process -FilePath $exe -ArgumentList @('--arayuz-testleri',('"'+(Join-Path $root 'work\setup34-arayuz-kontrol')+'"')) -WindowStyle Hidden -Wait -PassThru
+$oncekiSetup=Join-Path $root 'outputs\dagitim\Pronom-SolidWorks2020-2023-Kaydet34-R2-Kurulum.exe'
+$oncekiKaynak=[Reflection.Assembly]::LoadFile($oncekiSetup).GetManifestResourceStream('Pronom.Paket.zip')
+try {
+ $oncekiPaket=[IO.Compression.ZipArchive]::new($oncekiKaynak,[IO.Compression.ZipArchiveMode]::Read,$true)
+ try {
+  $kaydet34R2DllTestYolu=Join-Path $root 'work\kaydet35-build\onceki-Pronom.SolidWorks.dll'
+  [IO.Compression.ZipFileExtensions]::ExtractToFile($oncekiPaket.GetEntry('Pronom.SolidWorks.dll'),$kaydet34R2DllTestYolu,$true)
+ } finally {$oncekiPaket.Dispose()}
+} finally {$oncekiKaynak.Dispose()}
+$process=Start-Process -FilePath $exe -ArgumentList @('--guncelleme-testleri',('"'+(Join-Path $root 'work')+'"'),('"'+$kaydet34R2DllTestYolu+'"')) -WindowStyle Hidden -Wait -PassThru
+if($process.ExitCode -ne 0){throw 'Kaydet34 R2 surumunden guncelleme kontrolleri gecmedi.'}
+$process=Start-Process -FilePath $exe -ArgumentList @('--arayuz-testleri',('"'+(Join-Path $root 'work\setup35-arayuz-kontrol')+'"')) -WindowStyle Hidden -Wait -PassThru
 if($process.ExitCode -ne 0){throw 'DPI/arayüz kontrolleri geçmedi; dağıtım oluşturulmadı.'}
-$out=Join-Path $root 'outputs\dagitim\Pronom-SolidWorks2020-2023-Kaydet34-R2-Kurulum.exe'
+$out=Join-Path $root 'outputs\dagitim\Pronom-SolidWorks2020-2023-2027-Kaydet35-Kurulum.exe'
 Copy-Item -LiteralPath $exe -Destination $out -Force
-if($Yayinla){& (Join-Path $PSScriptRoot 'SetupYayinla.ps1') -SetupDosyasi $out -BeklenenSHA256 (Get-FileHash -LiteralPath $out).Hash}else{Write-Output 'ADAY PAKET: Web indirmesi degistirilmedi. Gercek 2020/2023 kabulu sonrasi -Yayinla ile yayinlanabilir.'}
+if($Yayinla){& (Join-Path $PSScriptRoot 'SetupYayinla.ps1') -SetupDosyasi $out -BeklenenSHA256 (Get-FileHash -LiteralPath $out).Hash}else{Write-Output 'ADAY PAKET: Web indirmesi degistirilmedi. -Yayinla secenegi web paketini de gunceller.'}
 Write-Output ('SETUP HAZIR: '+$out)

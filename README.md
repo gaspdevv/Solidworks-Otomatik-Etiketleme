@@ -4,9 +4,9 @@
 
 **Otomatik Etiketleme**, parça ve montajlara ortak bir merkezden dosya numarası verir. SolidWorks içindeki normal kayıt akışıyla çalışır; başarılı kayıtlar web arayüzünden aranır ve takip edilir. Küçük ekiplerin aynı numarayı iki kez kullanmadan, dosya adlarını elle yönetmeden çalışması için geliştirilmiştir.
 
-**Güncel sürüm:** Kaydet34 R2 · `2026.11.3.2`
-**Kaynak güncellemesi:** 5 Kasım 2026
-**Hedef:** Windows x64 · SolidWorks 2020–2023 · SQL Server
+**Güncel sürüm:** Kaydet35 · `2026.11.16.1`
+**Kaynak güncellemesi:** 16 Kasım 2026
+**Hedef:** Windows x64 · SolidWorks 2020–2023 veya 2027 · SQL Server
 
 > Otomatik Etiketleme ile yapay zekâ destekli **SolidWorks Co-Pilot** ayrı eklentilerdir. Bu depo otomatik etiketleme uygulamasının kaynaklarını ve iki paket için kullanılan web indirme arayüzünü içerir. Ayrı Co-Pilot ürününün derlenmiş DLL/EXE dosyaları burada dağıtılmaz.
 
@@ -82,7 +82,7 @@ Depo kökünde:
 
 Betik eklentiyi, hedef pencere okuyucusunu ve kurulumu derler; setup'ın kendi kontrollerini çalıştırır. Sonuç `work/github-build/bin/Etiket.Kurulum/release/Pronom.Kurulum.exe` konumundadır. Betik bilgisayara eklenti kurmaz, COM kaydı yapmaz, API başlatmaz veya veritabanını değiştirmez. API referansları ve oluşturulan ikili dosyalar Git dışında kalır.
 
-2020–2023 desteği için temel derleme 2020 API referanslarıyla yapılır. Daha yeni API referanslarıyla derlemek, eski sürüm uyumluluğunu tek başına kanıtlamaz.
+2020–2023 ve 2027 hedefleri için temel derleme 2020 API referanslarıyla yapılır. Daha yeni API referanslarıyla derlemek, eski sürüm uyumluluğunu tek başına kanıtlamaz.
 
 ### Merkezi API
 
@@ -105,11 +105,14 @@ Bu başlatma veritabanı oluşturmaz veya sıfırlamaz. Yerel web adresi `http:/
 
 ## Doğrulama ve sınırlar
 
+- Kaydet35, 2020 ve 2023 API referanslarıyla ayrı ayrı hatasız derlendi. Her iki çalıştırmada 958 çekirdek kontrol geçti.
+- SolidWorks 2027 algılaması ve Kaydet34 R2 üzerinden güncelleme, kurulum testlerinde doğrulandı. SolidWorks 2027 ile gerçek CAD kayıt testi yapılmadı.
+
 - Kaydet34 R2, 2020 ve 2023 API referanslarıyla ayrı ayrı hatasız derlendi; her iki çalıştırmada 951 çekirdek kontrol geçti.
 - Çevrimdışı iptal, yanıt kaybı, yeniden başlatma ve aynı işlem kimliğiyle güvenli tekrar kontrollü testlerde doğrulandı.
 - 80 dışa aktarım penceresi ve 16 kayıt girdisi kontrolü geçti. Bunlar kendi Windows test pencerelerinde çalışır; gerçek CAD kabulünün yerine geçmez.
 - Kurulum çekirdeği, eski sürümlerden güncelleme ve DPI/arayüz kontrolleri geçti.
-- 4 Kasım 2026'da Dell / SolidWorks 2023 SP0.1 üzerinde toparlama menüsü, belirsiz günlükleri koruma, iptal-sonrası tekrar, geometrili parça ve montajın Farklı Kaydet işlemleri, Bağımsız Yap, montajı kapatıp açma, Ctrl+S ve tek merkezi kayıt kontrolleri geçti.
+- 4 Kasım 2026'da SolidWorks 2023 SP0.1 üzerinde toparlama menüsü, belirsiz günlükleri koruma, iptal-sonrası tekrar, geometrili parça ve montajın Farklı Kaydet işlemleri, Bağımsız Yap, montajı kapatıp açma, Ctrl+S ve tek merkezi kayıt kontrolleri geçti.
 - Aynı gün SolidWorks 2020 SP4.0 üzerinde toparlama menüsü, iptal-sonrası tekrar, geometrili parça kaydı ve Ctrl+S kontrolleri geçti. 2020'de Bağımsız Yap ve dışa aktarım bu son turda yeniden sınanmadı.
 - Kaydet34 R2 web indirme paketi 4 Kasım'da yayımlandı ve indirilen ZIP'in içindeki EXE hash'i doğrulandı.
 - Her servis paketi ve ağ ortamı fiziksel olarak sınanmış değildir. Sorunlu istemcinin ağında Kaydet34 R2 kabulü henüz yapılmadı; ağ kök nedeninin giderildiği iddia edilmez.

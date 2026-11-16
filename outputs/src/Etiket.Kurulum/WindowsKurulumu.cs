@@ -35,7 +35,7 @@ namespace Pronom.Kurulum
      using(var sw=root.OpenSubKey(@"SOFTWARE\SolidWorks\SOLIDWORKS "+yil+@"\Setup"))
       return sw?.GetValue("SolidWorks Folder") as string;
     },File.Exists);
-    if(yillar.Length==0)throw new InvalidOperationException("SolidWorks 2020, 2021, 2022 veya 2023 kurulumu bulunamadı.");
+    if(yillar.Length==0)throw new InvalidOperationException("SolidWorks 2020–2023 veya 2027 kurulumu bulunamadı.");
    }
    KapaliMi();
   }
@@ -78,13 +78,13 @@ namespace Pronom.Kurulum
     using(var h=new HttpClient(new HttpClientHandler{AllowAutoRedirect=false,UseProxy=false}){Timeout=TimeSpan.FromSeconds(8)})
     using(var r=await h.GetAsync(new Uri(uri,"api/health")).ConfigureAwait(false))
     {
-     if(!r.IsSuccessStatusCode)throw new IOException("Merkez servisi hazır değil (HTTP "+(int)r.StatusCode+"). Dell'deki API açık olmalı.");
+     if(!r.IsSuccessStatusCode)throw new IOException("Merkez servisi hazır değil (HTTP "+(int)r.StatusCode+"). Merkez API açık olmalı.");
      var s=new JavaScriptSerializer().Deserialize<Dictionary<string,object>>(await r.Content.ReadAsStringAsync().ConfigureAwait(false));
      if(s==null||!s.TryGetValue("durum",out var d)||!s.TryGetValue("veritabani",out var v)||(string)d!="Hazır"||(string)v!="Bağlı")throw new IOException("Merkez servisinin sağlık yanıtı doğrulanamadı.");
     }
    }
-   catch(TaskCanceledException e){throw new IOException("Dell merkez API'si 8 saniye içinde yanıt vermedi. Adresi ve Dell'deki API penceresini kontrol edin.",e);}
-   catch(HttpRequestException e){throw new IOException("Merkez bağlantısı kurulamadı. Dell'deki API açık ve iki bilgisayar aynı ağda olmalı.",e);}
+   catch(TaskCanceledException e){throw new IOException("Merkez API'si 8 saniye içinde yanıt vermedi. Adresi ve Merkez API penceresini kontrol edin.",e);}
+   catch(HttpRequestException e){throw new IOException("Merkez bağlantısı kurulamadı. Merkez API açık ve iki bilgisayar aynı ağda olmalı.",e);}
   }
   static void RegAsm(string dll,bool kaldir=false)
   {

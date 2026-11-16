@@ -79,7 +79,7 @@ namespace Pronom.Kurulum
    var marka=new Label{Text="Pronom",ForeColor=Color.White,Font=new Font("Segoe UI",24,FontStyle.Bold),Location=new Point(28,16),Size=new Size(400,44)};ust.Controls.Add(marka);ozelFontlar.Add(marka);
    ust.Controls.Add(new Label{Text="SOLIDWORKS  /  DIŞA AKTARMA DESTEĞİ",ForeColor=Color.FromArgb(174,209,199),Location=new Point(31,69),Size=new Size(610,24)});
    var baslik=new Label{Text="Eklentiyi kullanıma hazır hale getirin",Font=new Font("Segoe UI",16,FontStyle.Bold),ForeColor=Petrol,Location=new Point(30,130),Size=new Size(650,34)};Controls.Add(baslik);ozelFontlar.Add(baslik);
-   Controls.Add(new Label{Text="SolidWorks 2020–2023 için dosyalar, eklenti kaydı ve kullanıcı ayarları birlikte hazırlanır.",Location=new Point(32,174),Size=new Size(650,43),ForeColor=Color.FromArgb(80,99,100)});
+   Controls.Add(new Label{Text="SolidWorks 2020–2023 ve 2027 için dosyalar, eklenti kaydı ve kullanıcı ayarları birlikte hazırlanır.",Location=new Point(32,174),Size=new Size(650,43),ForeColor=Color.FromArgb(80,99,100)});
    Controls.Add(new Label{Text="Merkez adresi",Location=new Point(32,226),Size=new Size(640,25)});
    adres.SetBounds(32,254,650,30);adres.Font=new Font("Segoe UI",12);adres.Text="http://192.0.2.10:5082";
    ozelFontlar.Add(adres);
@@ -88,14 +88,14 @@ namespace Pronom.Kurulum
    baslangic.Text="SolidWorks açıldığında Pronom otomatik yüklensin";baslangic.Checked=true;try{var onceki=WindowsKurulumu.BaslangicOku();if(onceki!=null)baslangic.Checked=Convert.ToInt32(onceki)!=0;}catch{}baslangic.SetBounds(32,302,650,30);Controls.Add(baslangic);
    Controls.Add(new Label{Text="Kurulum: "+WindowsKurulumu.Hedef,Location=new Point(32,351),Size=new Size(650,28),ForeColor=Color.FromArgb(80,99,100)});
    Controls.Add(new Label{Text="Windows kullanıcısı: "+Environment.UserName+"  ·  CAD dosyalarınız ve işlem günlükleriniz korunur.",Location=new Point(32,383),Size=new Size(650,44),ForeColor=Color.FromArgb(80,99,100)});
-   durum.Text="Dell merkez API'si açık, SolidWorks kapalı olmalı.";durum.SetBounds(32,431,650,64);durum.ForeColor=Petrol;Controls.Add(durum);
+   durum.Text="Merkez API'si açık, SolidWorks kapalı olmalı.";durum.SetBounds(32,431,650,64);durum.ForeColor=Petrol;Controls.Add(durum);
    ilerleme.SetBounds(32,501,650,5);ilerleme.Visible=false;ilerleme.Style=ProgressBarStyle.Marquee;Controls.Add(ilerleme);
    kapat.Text="Kapat";kapat.SetBounds(442,528,100,36);kapat.FlatStyle=FlatStyle.Flat;kapat.Click+=(s,e)=>Close();Controls.Add(kapat);
    kur.Text="Kur";kur.SetBounds(554,528,128,36);kur.BackColor=Yesil;kur.ForeColor=Color.White;kur.FlatStyle=FlatStyle.Flat;kur.Click+=async(s,e)=>await Kur();Controls.Add(kur);
    try
    {
     var bilgi=onizlemeBilgisi??WindowsKurulumu.KurulumBilgisiOku();islem=bilgi.Dugme;kur.Text=islem;
-    baslik.Text=bilgi.Baslik;durum.Text=bilgi.Aciklama+" Dell merkez API'si açık, SolidWorks kapalı olmalı.";
+    baslik.Text=bilgi.Baslik;durum.Text=bilgi.Aciklama+" Merkez API'si açık, SolidWorks kapalı olmalı.";
    }
    catch(Exception e){kur.Enabled=false;durum.Text="Mevcut kurulum doğrulanamadı: "+e.Message;}
    ResumeLayout(true);

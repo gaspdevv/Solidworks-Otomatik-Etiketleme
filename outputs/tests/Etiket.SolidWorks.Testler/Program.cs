@@ -414,6 +414,8 @@ partial class Program
   foreach(var rev in new[]{"28.0.0","28.1.0","28.2.0","28.4.0","28.5.1","29.0.0","29.5.0","30.0.0","30.5.1","31.5.0"})Kontrol(SolidWorksSurumKurali.TestHedefiMi(rev),"2020–2023 SP aralığı kabul edilmeli: "+rev);
   Kontrol(!SolidWorksSurumKurali.TestHedefiMi("27.5.0"),"2019 hedef dışında kalmalı.");
   Kontrol(!SolidWorksSurumKurali.TestHedefiMi("32.0.1"),"2024 bu test paketi tarafından kabul edilmemeli.");
+  foreach(var rev in new[]{"35.0","35.0.0","35.1.2","35.5.0"})Kontrol(SolidWorksSurumKurali.TestHedefiMi(rev),"2027 revizyonu kabul edilmeli: "+rev);
+  foreach(var rev in new[]{"33.0.0","34.0.0","36.0.0"})Kontrol(!SolidWorksSurumKurali.TestHedefiMi(rev),"Kapsam dışı revizyon reddedilmeli: "+rev);
   Kontrol(!SolidWorksSurumKurali.TestHedefiMi("31.-1.0"),"Ön sürüm kabul edilmemeli.");
   Kontrol(!SolidWorksSurumKurali.TestHedefiMi("31.abc"),"Bozuk revizyon kabul edilmemeli.");
   Kontrol(!SolidWorksSurumKurali.TestHedefiMi(null),"Eksik revizyon kabul edilmemeli.");

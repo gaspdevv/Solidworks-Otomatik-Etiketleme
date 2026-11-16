@@ -2,7 +2,7 @@
  <PropertyGroup>
   <OutputType>WinExe</OutputType><TargetFramework>net48</TargetFramework><LangVersion>latest</LangVersion><PlatformTarget>x64</PlatformTarget>
   <AutomaticallyUseReferenceAssemblyPackages>false</AutomaticallyUseReferenceAssemblyPackages><AssemblyName>Pronom.Kurulum</AssemblyName>
-  <Version>2026.11.3.2</Version><Company>Pronom</Company><Product>Pronom SolidWorks Co-Pilot Kurulumu</Product><Description>Kaydet34 R2 aday: kalıcı iptal kuyruğu ve kayıt toparlama</Description><ApplicationManifest>app.manifest</ApplicationManifest>
+  <Version>2026.11.16.1</Version><Company>Pronom</Company><Product>Pronom SolidWorks Co-Pilot Kurulumu</Product><Description>Kaydet35: SolidWorks 2027 desteği</Description><ApplicationManifest>app.manifest</ApplicationManifest>
  </PropertyGroup>
  <ItemGroup>
   <Reference Include="Microsoft.CSharp"/><Reference Include="System.Core"/><Reference Include="System.Windows.Forms"/><Reference Include="System.Drawing"/><Reference Include="System.Net.Http"/>
